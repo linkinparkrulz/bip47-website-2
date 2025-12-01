@@ -1,0 +1,16 @@
+{
+  "name": "bip47-terminal",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@bitcoinerlab/secp256k1": "^1.1.1",
+    "@samouraiwallet/bip47": "^1.0.3",
+    "@samouraiwallet/auth47": "^1.0.1",
+    "qrcode": "^1.5.3"
+  }
+}
