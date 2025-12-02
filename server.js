@@ -230,6 +230,113 @@ app.get('/callback', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'callback.html'));
 });
 
+// Handle Auth47 wallet callback (POST request from wallet)
+app.post('/callback', async (req, res) => {
+  try {
+    console.log('📥 Received Auth47 callback:', JSON.stringify(req.body, null, 2));
+    
+    const { auth47_response, challenge, nym, signature } = req.body;
+    
+    // Validate required fields
+    if (!challenge || !nym || !signature) {
+      console.error('❌ Missing required fields in callback');
+      // Still serve the callback page but with error info
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    // Parse challenge URL to extract nonce and validate expiry
+    let nonce;
+    let challengeExpiry;
+    try {
+      const challengeUrl = new URL(challenge);
+      nonce = challengeUrl.hostname || challengeUrl.pathname.replace(/^\/\//, '');
+      
+      // Extract expiry from challenge parameters
+      const params = new URLSearchParams(challengeUrl.search);
+      challengeExpiry = params.get('e');
+      
+      if (!challengeExpiry) {
+        console.error('❌ Missing expiry parameter in challenge');
+        return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+      }
+    } catch (e) {
+      console.error('❌ Invalid challenge format in callback:', challenge);
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    console.log(`🔍 Callback - Extracted nonce: ${nonce}, expiry: ${challengeExpiry}`);
+    
+    // Verify nonce exists
+    const auth = pendingAuths.get(nonce);
+    if (!auth) {
+      console.error('❌ Invalid or expired nonce in callback');
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    // Verify expiry matches and is not expired
+    const currentTime = Math.floor(Date.now() / 1000);
+    const expiryTime = parseInt(challengeExpiry, 10);
+    
+    if (expiryTime <= currentTime) {
+      console.error('❌ Challenge has expired in callback');
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    if (auth.expiry !== expiryTime) {
+      console.error('❌ Expiry mismatch in callback');
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    if (auth.verified) {
+      console.error('❌ Nonce already used in callback');
+      return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+    
+    // Parse payment code
+    console.log(`🔑 Parsing payment code in callback: ${nym}`);
+    const paymentCode = bip47.fromBase58(nym);
+    const notificationPubKey = paymentCode.getNotificationPublicKey();
+    
+    console.log(`📋 Notification pubkey length: ${notificationPubKey.length}`);
+    
+    // Create message hash from challenge
+    const messageHash = crypto.createHash('sha256')
+      .update(challenge)
+      .digest();
+    
+    console.log(`🔐 Message hash: ${messageHash.toString('hex')}`);
+    
+    // Decode signature from base64
+    const signatureBuffer = Buffer.from(signature, 'base64');
+    console.log(`✍️  Signature length: ${signatureBuffer.length}`);
+    
+    // Verify signature
+    const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
+    
+    console.log(`${isValid ? '✅' : '❌'} Callback signature verification: ${isValid}`);
+    
+    if (isValid) {
+      // Mark as verified
+      auth.verified = true;
+      auth.nym = nym;
+      auth.paymentCode = nym;
+      
+      console.log(`🎉 Authentication successful via callback for ${nym}`);
+      
+      // Serve the success page
+      res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    } else {
+      console.error('❌ Invalid signature in callback');
+      // Still serve the callback page
+      res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+    }
+  } catch (error) {
+    console.error('💥 Callback error:', error);
+    // Still serve the callback page even on error
+    res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 
