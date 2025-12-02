@@ -79,7 +79,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public - REMOVED: Needed for Railway deployment
 
 # Storybook build outputs
 .out

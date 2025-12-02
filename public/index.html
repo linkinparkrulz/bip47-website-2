@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIP47 Terminal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      color: #00ff41;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      text-shadow: 0 0 10px #00ff41;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00ff41; }
+      to { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41; }
+    }
+    
+    .card {
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid #00ff41;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    button {
+      background: #00ff41;
+      color: #0a0e27;
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    
+    button:hover:not(:disabled) {
+      background: #00cc33;
+      box-shadow: 0 0 20px #00ff41;
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #qrCode {
+      text-align: center;
+      margin: 2rem 0;
+      animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    #qrCode img {
+      max-width: 100%;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+    
+    .uri-display {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      border-radius: 4px;
+      word-break: break-all;
+      font-size: 0.75rem;
+      margin-top: 1rem;
+      border: 1px solid rgba(0, 255, 65, 0.2);
+    }
+    
+    .status {
+      text-align: center;
+      margin: 1rem 0;
+      font-size: 1.2rem;
+      padding: 1rem;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .status.pending {
+      color: #ffaa00;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .status.success { 
+      color: #00ff41; 
+      background: rgba(0, 255, 65, 0.1);
+    }
+    
+    .status.error { 
+      color: #ff4444; 
+      background: rgba(255, 68, 68, 0.1);
+    }
+    
+    .result {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      border: 1px solid #00ff41;
+    }
+    
+    .result div {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      background: rgba(0, 255, 65, 0.05);
+      border-radius: 4px;
+    }
+    
+    .label {
+      color: #888;
+      margin-right: 0.5rem;
+    }
+    
+    .value {
+      color: #00ff41;
+      word-break: break-all;
+    }
+    
+    .instructions {
+      line-height: 1.8;
+    }
+    
+    .instructions ol {
+      margin-left: 1.5rem;
+    }
+    
+    .instructions li {
+      margin: 0.5rem 0;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 255, 65, 0.3);
+      border-top-color: #00ff41;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 BIP47 Terminal</h1>
+    
+    <div class="card">
+      <button id="startAuth" onclick="startAuth()">
+        Generate Auth QR Code
+      </button>
+      
+      <div id="qrCode" style="display: none;"></div>
+      
+      <div id="status" style="display: none;"></div>
+      
+      <div id="result" style="display: none;"></div>
+    </div>
+    
+    <div class="card">
+      <h3 style="margin-bottom: 1rem;">📋 Instructions:</h3>
+      <div class="instructions">
+        <ol>
+          <li>Click "Generate Auth QR Code" above</li>
+          <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
+          <li>Navigate to the Auth47 authentication feature</li>
+          <li>Scan the displayed QR code</li>
+          <li>Wait for automatic verification</li>
+        </ol>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3 style="margin-bottom: 1rem;">ℹ️ About</h3>
+      <p style="line-height: 1.6; color: #aaa;">
+        This terminal implements BIP47 Auth47 authentication protocol.
+        It allows wallets to prove ownership of a payment code by
+        signing a challenge with their notification key.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let pollInterval = null;
+    let currentNonce = null;
+    
+    async function startAuth() {
+      const btn = document.getElementById('startAuth');
+      const qrDiv = document.getElementById('qrCode');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      
+      // Clear previous poll
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      
+      btn.disabled = true;
+      status.style.display = 'block';
+      status.className = 'status';
+      status.innerHTML = '<div class="spinner"></div> Generating...';
+      qrDiv.style.display = 'none';
+      result.style.display = 'none';
+      
+      try {
+        const response = await fetch('/start-auth');
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        currentNonce = data.nonce;
+        
+        qrDiv.innerHTML = `
+          <img src="${data.qr}" alt="Auth QR Code">
+          <div class="uri-display">
+            <div class="label">Auth47 URI:</div>
+            <div class="value">${data.uri}</div>
+          </div>
+          <div class="uri-display" style="margin-top: 0.5rem;">
+            <div class="label">Nonce:</div>
+            <div class="value">${data.nonce}</div>
+          </div>
+        `;
+        qrDiv.style.display = 'block';
+        
+        status.className = 'status pending';
+        status.innerHTML = '📱 Waiting for wallet to scan... <div class="spinner"></div>';
+        
+        // Start polling for verification
+        startPolling(data.nonce);
+        
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `❌ Error: ${error.message}`;
+        btn.disabled = false;
+      }
+    }
+    
+    function startPolling(nonce) {
+      // Poll every 2 seconds
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/check-auth/${nonce}`);
+          const data = await response.json();
+          
+          if (data.status === 'verified') {
+            clearInterval(pollInterval);
+            showSuccess(data);
+          } else if (data.status === 'invalid') {
+            clearInterval(pollInterval);
+            showError('Authentication expired or invalid');
+          }
+          // If pending, keep polling
+        } catch (error) {
+          console.error('Poll error:', error);
+        }
+      }, 2000);
+      
+      // Stop polling after 5 minutes
+      setTimeout(() => {
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          showError('Authentication timeout (5 minutes)');
+        }
+      }, 300000);
+    }
+    
+    function showSuccess(data) {
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const btn = document.getElementById('startAuth');
+      
+      status.className = 'status success';
+      status.innerHTML = '✅ Authentication Successful!';
+      
+      result.innerHTML = `
+        <h3 style="margin-bottom: 1rem; color: #00ff41;">🎉 Verified Payment Code</h3>
+        <div>
+          <span class="label">Nym:</span>
+          <span class="value">${data.nym}</span>
+        </div>
+        <div>
+          <span class="label">Payment Code:</span>
+          <span class="value">${data.paymentCode}</span>
+        </div>
+      `;
+      result.style.display = 'block';
+      
+      btn.disabled = false;
+    }
+    
+    function showError(message) {
+      const status = document.getElementById('status');
+      const btn = document.getElementById('startAuth');
+      
+      status.className = 'status error';
+      status.innerHTML = `❌ ${message}`;
+      
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
