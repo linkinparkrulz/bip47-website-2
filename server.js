@@ -239,6 +239,11 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Root route - serve the main terminal interface
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log('\n🟢 BIP47 Manual Auth Server running!');
   console.log(`→ http://localhost:${PORT}`);
