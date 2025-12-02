@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required'",
+    "build": "echo 'Building BIP47 Terminal...' && ls -la public/ && echo 'Public directory contents verified'",
     "railway:deploy": "railway up"
   },
   "engines": {
