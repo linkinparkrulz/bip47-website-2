@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required'",
+    "railway:deploy": "railway up"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
