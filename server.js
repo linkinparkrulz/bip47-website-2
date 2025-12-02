@@ -26,6 +26,7 @@ const bip47 = BIP47Factory(ecc);
 // Dynamic callback URL for production deployment
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/callback`;
 
+
 // Store pending authentications (use Redis/DB in production)
 const pendingAuths = new Map();
 
@@ -240,7 +241,6 @@ app.post('/callback', async (req, res) => {
     // Validate required fields
     if (!challenge || !nym || !signature) {
       console.error('❌ Missing required fields in callback');
-      // Still serve the callback page but with error info
       return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
     }
     
@@ -292,41 +292,48 @@ app.post('/callback', async (req, res) => {
       return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
     }
     
-    // Parse payment code
-    console.log(`🔑 Parsing payment code in callback: ${nym}`);
-    const paymentCode = bip47.fromBase58(nym);
-    const notificationPubKey = paymentCode.getNotificationPublicKey();
-    
-    console.log(`📋 Notification pubkey length: ${notificationPubKey.length}`);
-    
-    // Create message hash from challenge
-    const messageHash = crypto.createHash('sha256')
-      .update(challenge)
-      .digest();
-    
-    console.log(`🔐 Message hash: ${messageHash.toString('hex')}`);
-    
-    // Decode signature from base64
-    const signatureBuffer = Buffer.from(signature, 'base64');
-    console.log(`✍️  Signature length: ${signatureBuffer.length}`);
-    
-    // Verify signature
-    const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
-    
-    console.log(`${isValid ? '✅' : '❌'} Callback signature verification: ${isValid}`);
-    
-    if (isValid) {
-      // Mark as verified
-      auth.verified = true;
-      auth.nym = nym;
-      auth.paymentCode = nym;
+    // Manual signature verification (same as /verify endpoint)
+    try {
+      // Parse payment code
+      console.log(`🔑 Parsing payment code in callback: ${nym}`);
+      const paymentCode = bip47.fromBase58(nym);
+      const notificationPubKey = paymentCode.getNotificationPublicKey();
       
-      console.log(`🎉 Authentication successful via callback for ${nym}`);
+      console.log(`📋 Callback notification pubkey length: ${notificationPubKey.length}`);
       
-      // Serve the success page
-      res.sendFile(path.join(__dirname, 'public', 'callback.html'));
-    } else {
-      console.error('❌ Invalid signature in callback');
+      // Create message hash from challenge
+      const messageHash = crypto.createHash('sha256')
+        .update(challenge)
+        .digest();
+      
+      console.log(`🔐 Callback message hash: ${messageHash.toString('hex')}`);
+      
+      // Decode signature from base64
+      const signatureBuffer = Buffer.from(signature, 'base64');
+      console.log(`✍️  Callback signature length: ${signatureBuffer.length}`);
+      
+      // Verify signature
+      const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
+      
+      console.log(`${isValid ? '✅' : '❌'} Callback signature verification: ${isValid}`);
+      
+      if (isValid) {
+        // Mark as verified
+        auth.verified = true;
+        auth.nym = nym;
+        auth.paymentCode = nym;
+        
+        console.log(`🎉 Authentication successful via callback for ${nym}`);
+        
+        // Serve the success page
+        res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+      } else {
+        console.log('❌ Callback verification failed: Invalid signature');
+        // Still serve the callback page
+        res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+      }
+    } catch (verifyError) {
+      console.log('❌ Callback verification error:', verifyError.message);
       // Still serve the callback page
       res.sendFile(path.join(__dirname, 'public', 'callback.html'));
     }
