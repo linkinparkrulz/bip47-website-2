@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIP47 Guestbook - Community Messages</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            color: #00ff41;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: #000;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .terminal-header {
+            background: #001100;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff4444; }
+        .dot-yellow { background: #ffaa00; }
+        .dot-green { background: #00ff41; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #00ff41;
+            opacity: 0.8;
+        }
+
+        .terminal-content { padding: 2rem; }
+
+        /* Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        .back-link {
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover { opacity: 0.7; }
+
+        h1 {
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Sign Button */
+        .sign-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sign-btn {
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            padding: 1rem 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .sign-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .sign-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Messages List */
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message-card {
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid #00ff41;
+            border-radius: 6px;
+            padding: 1.5rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #00ff41;
+            object-fit: cover;
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .avatar-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .message-meta {
+            flex: 1;
+        }
+
+        .nym-name {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #00ff41;
+            margin-bottom: 0.25rem;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .message-body {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #00ff41;
+            word-wrap: break-word;
+        }
+
+        /* Auth Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: #000;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            color: #00ff41;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #00ff41;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover { opacity: 0.7; }
+
+        .qr-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .qr-code {
+            max-width: 100%;
+            border: 2px solid #00ff41;
+            border-radius: 4px;
+            padding: 1rem;
+            background: white;
+        }
+
+        .auth-status {
+            text-align: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .auth-status.pending {
+            color: #ffaa00;
+            border-left: 3px solid #ffaa00;
+        }
+
+        .auth-status.verified {
+            color: #00ff41;
+            border-left: 3px solid #00ff41;
+        }
+
+        .auth-status.error {
+            color: #ff4444;
+            border-left: 3px solid #ff4444;
+        }
+
+        .message-input {
+            margin: 1rem 0;
+        }
+
+        textarea {
+            width: 100%;
+            background: #001100;
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            padding: 0.75rem;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 65, 0.2);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 65, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ff41;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #ff4444;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-left: 3px solid #ff4444;
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0, 255, 65, 0.2);
+            margin-top: 2rem;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dot dot-red"></div>
+                <div class="terminal-dot dot-yellow"></div>
+                <div class="terminal-dot dot-green"></div>
+                <div class="terminal-title">BIP47 GUESTBOOK v1.0.0 - COMMUNITY MESSAGES</div>
+            </div>
+
+            <div class="terminal-content">
+                <div class="nav-bar">
+                    <a href="/" class="back-link">← RETURN TO TERMINAL</a>
+                    <span style="color: #888; font-size: 0.8rem;">[SYSTEM: ONLINE]</span>
+                </div>
+
+                <h1>> GUESTBOOK.EXE</h1>
+                <div class="subtitle">Cryptographically verified messages from the BIP47 community</div>
+
+                <div class="sign-section">
+                    <button id="sign-btn" class="sign-btn" onclick="openAuthModal()">
+                        ✍️ SIGN GUESTBOOK
+                    </button>
+                </div>
+
+                <div id="messages-container" class="messages-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>Loading messages...</div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-text">All messages are cryptographically signed with BIP47 payment codes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Authenticate with BIP47</h2>
+                <button class="close-btn" onclick="closeAuthModal()">×</button>
+            </div>
+
+            <div id="auth-step-1">
+                <p style="margin-bottom: 1rem; color: #888; font-size: 0.9rem;">
+                    Scan this QR code with your BIP47 wallet (Samourai Wallet, Sparrow Wallet, etc.) to sign the guestbook.
+                </p>
+
+                <div class="qr-container">
+                    <div id="qr-loading" style="color: #888;">Generating QR code...</div>
+                    <img id="qr-code" class="qr-code" style="display: none;" alt="Auth47 QR Code">
+                </div>
+
+                <div id="auth-status" class="auth-status pending">
+                    Waiting for wallet signature...
+                </div>
+            </div>
+
+            <div id="auth-step-2" style="display: none;">
+                <p style="margin-bottom: 1rem; color: #00ff41; font-size: 0.9rem;">
+                    ✅ Authentication successful! You are now verified as:
+                </p>
+                <p style="margin-bottom: 1.5rem; font-weight: bold; color: #00ff41;" id="verified-nym"></p>
+
+                <div class="message-input">
+                    <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.5rem; text-transform: uppercase;">
+                        Your Message
+                    </label>
+                    <textarea id="message-text" placeholder="Write your message to the BIP47 community..." maxlength="500"></textarea>
+                    <div style="text-align: right; font-size: 0.75rem; color: #888; margin-top: 0.25rem;">
+                        <span id="char-count">0</span>/500 characters
+                    </div>
+                </div>
+
+                <button id="submit-btn" class="submit-btn" onclick="submitMessage()">
+                    SUBMIT MESSAGE
+                </button>
+
+                <div id="submit-error" class="error-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentNonce = null;
+        let currentAuth = null;
+        let pollInterval = null;
+
+        // Load messages on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+        });
+
+        // Load all messages
+        async function loadMessages() {
+            try {
+                console.log('🔍 Loading messages...');
+                const response = await fetch('/api/guestbook/messages');
+                const messages = await response.json();
+
+                const container = document.getElementById('messages-container');
+
+                if (messages.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <div>No messages yet. Be the first to sign!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = messages.map(msg => `
+                    <div class="message-card">
+                        <div class="message-header">
+                            ${msg.nymAvatar 
+                                ? `<img src="${msg.nymAvatar}" class="avatar" alt="${msg.nymName}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <div class="avatar-placeholder" style="display: none;">?</div>`
+                                : `<div class="avatar-placeholder">?</div>`
+                            }
+                            <div class="message-meta">
+                                <div class="nym-name">${escapeHtml(msg.nymName)}</div>
+                                <div class="timestamp">${formatDate(msg.createdAt)}</div>
+                            </div>
+                        </div>
+                        <div class="message-body">${escapeHtml(msg.message)}</div>
+                    </div>
+                `).join('');
+
+                console.log(`✅ Loaded ${messages.length} messages`);
+            } catch (error) {
+                console.error('💥 Error loading messages:', error);
+                document.getElementById('messages-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div>Failed to load messages. Please try again.</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Open auth modal
+        async function openAuthModal() {
+            document.getElementById('auth-modal').classList.add('active');
+            document.getElementById('auth-step-1').style.display = 'block';
+            document.getElementById('auth-step-2').style.display = 'none';
+            document.getElementById('qr-loading').style.display = 'block';
+            document.getElementById('qr-code').style.display = 'none';
+            document.getElementById('auth-status').className = 'auth-status pending';
+            document.getElementById('auth-status').textContent = 'Waiting for wallet signature...';
+
+            try {
+                console.log('🔍 Starting authentication...');
+                const response = await fetch('/start-auth');
+                const data = await response.json();
+
+                currentNonce = data.nonce;
+                console.log(`✅ Generated nonce: ${currentNonce}`);
+
+                document.getElementById('qr-code').src = data.qr;
+                document.getElementById('qr-code').style.display = 'block';
+                document.getElementById('qr-loading').style.display = 'none';
+
+                // Start polling for auth status
+                startPolling(data.nonce);
+            } catch (error) {
+                console.error('💥 Error starting auth:', error);
+                document.getElementById('auth-status').className = 'auth-status error';
+                document.getElementById('auth-status').textContent = 'Failed to generate QR code';
+            }
+        }
+
+        // Start polling for auth status
+        function startPolling(nonce) {
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/check-auth/${nonce}`);
+                    const data = await response.json();
+
+                    if (data.status === 'verified') {
+                        clearInterval(pollInterval);
+                        currentAuth = data;
+                        console.log(`✅ Auth verified for ${data.nym}`);
+                        
+                        document.getElementById('auth-status').className = 'auth-status verified';
+                        document.getElementById('auth-status').textContent = '✅ Authentication successful!';
+                        
+                        // Show step 2
+                        setTimeout(() => {
+                            document.getElementById('auth-step-1').style.display = 'none';
+                            document.getElementById('auth-step-2').style.display = 'block';
+                            document.getElementById('verified-nym').textContent = data.nym;
+                            
+                            // Setup character counter
+                            const textarea = document.getElementById('message-text');
+                            textarea.addEventListener('input', () => {
+                                document.getElementById('char-count').textContent = textarea.value.length;
+                            });
+                        }, 1000);
+                    } else if (data.status === 'invalid') {
+                        clearInterval(pollInterval);
+                        document.getElementById('auth-status').className = 'auth-status error';
+                        document.getElementById('auth-status').textContent = '❌ Authentication failed or expired';
+                    }
+                } catch (error) {
+                    console.error('💥 Polling error:', error);
+                }
+            }, 2000);
+        }
+
+        // Close auth modal
+        function closeAuthModal() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+            document.getElementById('auth-modal').classList.remove('active');
+            currentNonce = null;
+            currentAuth = null;
+        }
+
+        // Submit message
+        async function submitMessage() {
+            const message = document.getElementById('message-text').value.trim();
+            
+            if (!message) {
+                showError('Please enter a message');
+                return;
+            }
+
+            if (!currentAuth) {
+                showError('Authentication expired. Please try again.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span>SUBMITTING...';
+
+            try {
+                console.log('📝 Submitting message...');
+                const response = await fetch('/api/guestbook/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nonce: currentNonce,
+                        message: message,
+                        challenge: currentAuth.challenge,
+                        signature: currentAuth.signature,
+                        nym: currentAuth.paymentCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    console.log('✅ Message submitted successfully');
+                    closeAuthModal();
+                    loadMessages(); // Reload messages
+                    alert('✅ Message submitted successfully!');
+                } else {
+                    showError(data.error || 'Failed to submit message');
+                }
+            } catch (error) {
+                console.error('💥 Submit error:', error);
+                showError('Failed to submit message. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'SUBMIT MESSAGE';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('submit-error');
+            errorDiv.textContent = `❌ ${message}`;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+            
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+
+        console.log('✅ Guestbook initialized');
+        console.log('🔍 Ready for Auth47 authentication');
+    </script>
+</body>
+</html>

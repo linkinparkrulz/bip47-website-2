@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth47 Login - BIP47 Terminal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      color: #00ff41;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+    }
+    
+    /* Terminal Window Styling */
+    .terminal-window {
+      background: #000;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    }
+    
+    .terminal-header {
+      background: #001100;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #00ff41;
+    }
+    
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .dot-red { background: #ff4444; }
+    .dot-yellow { background: #ffaa00; }
+    .dot-green { background: #00ff41; }
+    
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #00ff41;
+      opacity: 0.8;
+    }
+    
+    .terminal-content {
+      padding: 2rem;
+    }
+    
+    /* Navigation */
+    .nav {
+      margin-bottom: 2rem;
+    }
+    
+    .nav a {
+      color: #00ff41;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+    
+    .nav a:hover {
+      opacity: 1;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px #00ff41;
+    }
+    
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    
+    /* Auth Card */
+    .auth-card {
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid #00ff41;
+      border-radius: 6px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    button {
+      background: #00ff41;
+      color: #0a0e27;
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    
+    button:hover:not(:disabled) {
+      background: #00cc33;
+      box-shadow: 0 0 20px #00ff41;
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #qrCode {
+      text-align: center;
+      margin: 2rem 0;
+      animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    #qrCode img {
+      max-width: 100%;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+    
+    .uri-display {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      border-radius: 4px;
+      word-break: break-all;
+      font-size: 0.75rem;
+      margin-top: 1rem;
+      border: 1px solid rgba(0, 255, 65, 0.2);
+    }
+    
+    .uri-label {
+      color: #888;
+      margin-bottom: 0.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+    
+    .uri-value {
+      color: #00ff41;
+      font-family: monospace;
+    }
+    
+    .status {
+      text-align: center;
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      padding: 1rem;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .status.pending {
+      color: #ffaa00;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .status.success { 
+      color: #00ff41; 
+      background: rgba(0, 255, 65, 0.1);
+    }
+    
+    .status.error { 
+      color: #ff4444; 
+      background: rgba(255, 68, 68, 0.1);
+    }
+    
+    .result {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      border: 1px solid #00ff41;
+    }
+    
+    .result-title {
+      font-size: 1rem;
+      color: #00ff41;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+    }
+    
+    .result-item {
+      margin: 0.75rem 0;
+      padding: 0.75rem;
+      background: rgba(0, 255, 65, 0.05);
+      border-radius: 4px;
+    }
+    
+    .result-label {
+      color: #888;
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+    
+    .result-value {
+      color: #00ff41;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    
+    .instructions {
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid #00ff41;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .instructions h3 {
+      margin-bottom: 1rem;
+      color: #00ff41;
+    }
+    
+    .instructions ol {
+      margin-left: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    .instructions li {
+      margin: 0.5rem 0;
+      color: #888;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 255, 65, 0.3);
+      border-top-color: #00ff41;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid rgba(0, 255, 65, 0.2);
+      margin-top: 2rem;
+    }
+    
+    .footer-text {
+      font-size: 0.75rem;
+      color: #888;
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-dot dot-red"></div>
+        <div class="terminal-dot dot-yellow"></div>
+        <div class="terminal-dot dot-green"></div>
+        <div class="terminal-title">AUTH47 LOGIN v1.0.0</div>
+      </div>
+      
+      <div class="terminal-content">
+        <div class="nav">
+          <a href="/">← Back to Terminal</a>
+        </div>
+        
+        <div class="header">
+          <h1>> AUTH47 LOGIN</h1>
+          <div class="subtitle">Bitcoin-based authentication using auth47 protocol</div>
+        </div>
+        
+        <div class="auth-card">
+          <button id="startAuth" onclick="startAuth()">
+            Generate Auth QR Code
+          </button>
+          
+          <div id="qrCode" style="display: none;"></div>
+          
+          <div id="status" style="display: none;"></div>
+          
+          <div id="result" style="display: none;"></div>
+        </div>
+        
+        <div class="instructions">
+          <h3>📋 Instructions:</h3>
+          <ol>
+            <li>Click "Generate Auth QR Code" above</li>
+            <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
+            <li>Navigate to the Auth47 authentication feature</li>
+            <li>Scan the displayed QR code</li>
+            <li>Wait for automatic verification</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="footer-text">Built with BIP47 Auth47 Protocol</div>
+      <div class="footer-text">Privacy is a fundamental human right</div>
+    </div>
+  </div>
+
+  <script>
+    let pollInterval = null;
+    let currentNonce = null;
+    
+    async function startAuth() {
+      const btn = document.getElementById('startAuth');
+      const qrDiv = document.getElementById('qrCode');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      
+      // Clear previous poll
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      
+      btn.disabled = true;
+      status.style.display = 'block';
+      status.className = 'status';
+      status.innerHTML = '<div class="spinner"></div> Generating...';
+      qrDiv.style.display = 'none';
+      result.style.display = 'none';
+      
+      try {
+        const response = await fetch('/start-auth');
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        currentNonce = data.nonce;
+        
+        qrDiv.innerHTML = `
+          <img src="${data.qr}" alt="Auth QR Code">
+          <div class="uri-display">
+            <div class="uri-label">Auth47 URI:</div>
+            <div class="uri-value">${data.uri}</div>
+          </div>
+          <div class="uri-display" style="margin-top: 0.5rem;">
+            <div class="uri-label">Nonce:</div>
+            <div class="uri-value">${data.nonce}</div>
+          </div>
+        `;
+        qrDiv.style.display = 'block';
+        
+        status.className = 'status pending';
+        status.innerHTML = '📱 Waiting for wallet to scan... <div class="spinner"></div>';
+        
+        // Start polling for verification
+        startPolling(data.nonce);
+        
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `❌ Error: ${error.message}`;
+        btn.disabled = false;
+      }
+    }
+    
+    function startPolling(nonce) {
+      // Poll every 2 seconds
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/check-auth/${nonce}`);
+          const data = await response.json();
+          
+          if (data.status === 'verified') {
+            clearInterval(pollInterval);
+            showSuccess(data);
+          } else if (data.status === 'invalid') {
+            clearInterval(pollInterval);
+            showError('Authentication expired or invalid');
+          }
+          // If pending, keep polling
+        } catch (error) {
+          console.error('Poll error:', error);
+        }
+      }, 2000);
+      
+      // Stop polling after 5 minutes
+      setTimeout(() => {
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          showError('Authentication timeout (5 minutes)');
+        }
+      }, 300000);
+    }
+    
+    function showSuccess(data) {
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const btn = document.getElementById('startAuth');
+      
+      status.className = 'status success';
+      status.innerHTML = '✅ Authentication Successful!';
+      
+      result.innerHTML = `
+        <div class="result-title">🎉 Verified Payment Code</div>
+        <div class="result-item">
+          <div class="result-label">Nym:</div>
+          <div class="result-value">${data.nym}</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Payment Code:</div>
+          <div class="result-value">${data.paymentCode}</div>
+        </div>
+      `;
+      result.style.display = 'block';
+      
+      btn.disabled = false;
+    }
+    
+    function showError(message) {
+      const status = document.getElementById('status');
+      const btn = document.getElementById('startAuth');
+      
+      status.className = 'status error';
+      status.innerHTML = `❌ ${message}`;
+      
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

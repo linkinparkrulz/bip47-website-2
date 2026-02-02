@@ -12,11 +12,13 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
     "@bitcoinerlab/secp256k1": "^1.1.1",
-    "@samouraiwallet/bip47": "^1.0.3",
     "@samouraiwallet/auth47": "^1.0.1",
+    "@samouraiwallet/bip47": "^1.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "node-fetch": "^3.3.2",
     "qrcode": "^1.5.3"
   }
 }

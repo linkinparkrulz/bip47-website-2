@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BIP47 Terminal</title>
+  <title>BIP47 & Paynyms Terminal</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -11,330 +11,294 @@
       font-family: 'Courier New', monospace;
       background: #0a0e27;
       color: #00ff41;
-      padding: 2rem;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     
     .container {
-      max-width: 700px;
+      max-width: 900px;
       margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+    }
+    
+    /* Terminal Window Styling */
+    .terminal-window {
+      background: #000;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    }
+    
+    .terminal-header {
+      background: #001100;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #00ff41;
+    }
+    
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .dot-red { background: #ff4444; }
+    .dot-yellow { background: #ffaa00; }
+    .dot-green { background: #00ff41; }
+    
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #00ff41;
+      opacity: 0.8;
+    }
+    
+    .terminal-content {
+      padding: 2rem;
+    }
+    
+    /* Header Section */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
     
     h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-      font-size: 2.5rem;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
       text-shadow: 0 0 10px #00ff41;
-      animation: glow 2s ease-in-out infinite alternate;
     }
     
-    @keyframes glow {
-      from { text-shadow: 0 0 10px #00ff41; }
-      to { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41; }
+    .subtitle {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .tagline {
+      color: #00ff41;
+      opacity: 0.7;
+      font-size: 0.8rem;
+    }
+    
+    /* Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 600px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
     }
     
     .card {
-      background: rgba(0, 255, 65, 0.05);
+      background: rgba(0, 255, 65, 0.03);
       border: 1px solid #00ff41;
-      border-radius: 8px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-    
-    button {
-      background: #00ff41;
-      color: #0a0e27;
-      border: none;
-      padding: 1rem 2rem;
-      font-family: 'Courier New', monospace;
-      font-size: 1rem;
-      font-weight: bold;
+      border-radius: 6px;
+      padding: 1.5rem;
       cursor: pointer;
-      border-radius: 4px;
-      width: 100%;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
     
-    button:hover:not(:disabled) {
-      background: #00cc33;
-      box-shadow: 0 0 20px #00ff41;
+    .card:hover {
+      background: rgba(0, 255, 65, 0.08);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
       transform: translateY(-2px);
     }
     
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
     }
     
-    #qrCode {
-      text-align: center;
-      margin: 2rem 0;
-      animation: fadeIn 0.5s;
+    .card-title {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #00ff41;
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    .card-description {
+      font-size: 0.8rem;
+      color: #888;
+      line-height: 1.4;
+      margin-bottom: 1rem;
     }
     
-    #qrCode img {
-      max-width: 100%;
-      border: 2px solid #00ff41;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    .card-action {
+      font-size: 0.7rem;
+      color: #00ff41;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     
-    .uri-display {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 1rem;
+    /* Status Bar */
+    .status-bar {
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid #00ff41;
       border-radius: 4px;
-      word-break: break-all;
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .status-line {
       font-size: 0.75rem;
-      margin-top: 1rem;
-      border: 1px solid rgba(0, 255, 65, 0.2);
+      color: #00ff41;
+      opacity: 0.8;
+      margin: 0.25rem 0;
     }
     
-    .status {
-      text-align: center;
-      margin: 1rem 0;
-      font-size: 1.2rem;
-      padding: 1rem;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-    
-    .status.pending {
-      color: #ffaa00;
-      animation: pulse 1.5s ease-in-out infinite;
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #00ff41;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+      animation: pulse 2s infinite;
     }
     
     @keyframes pulse {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+      50% { opacity: 0.4; }
     }
     
-    .status.success { 
-      color: #00ff41; 
-      background: rgba(0, 255, 65, 0.1);
-    }
-    
-    .status.error { 
-      color: #ff4444; 
-      background: rgba(255, 68, 68, 0.1);
-    }
-    
-    .result {
-      margin-top: 1rem;
+    /* Footer */
+    .footer {
+      text-align: center;
       padding: 1.5rem;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 4px;
-      border: 1px solid #00ff41;
+      border-top: 1px solid rgba(0, 255, 65, 0.2);
     }
     
-    .result div {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      background: rgba(0, 255, 65, 0.05);
-      border-radius: 4px;
-    }
-    
-    .label {
+    .footer-text {
+      font-size: 0.75rem;
       color: #888;
-      margin-right: 0.5rem;
+      margin: 0.25rem 0;
     }
     
-    .value {
-      color: #00ff41;
-      word-break: break-all;
+    .footer-heart {
+      color: #ff4444;
     }
     
-    .instructions {
-      line-height: 1.8;
+    /* Coming Soon Overlay */
+    .card.coming-soon {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
-    .instructions ol {
-      margin-left: 1.5rem;
+    .card.coming-soon:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(0, 255, 65, 0.03);
     }
     
-    .instructions li {
-      margin: 0.5rem 0;
+    .coming-soon-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.6rem;
+      background: #ffaa00;
+      color: #000;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-weight: bold;
     }
     
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0, 255, 65, 0.3);
-      border-top-color: #00ff41;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .card {
+      position: relative;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🔐 BIP47 Terminal</h1>
-    
-    <div class="card">
-      <button id="startAuth" onclick="startAuth()">
-        Generate Auth QR Code
-      </button>
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-dot dot-red"></div>
+        <div class="terminal-dot dot-yellow"></div>
+        <div class="terminal-dot dot-green"></div>
+        <div class="terminal-title">BIP47 & PAYNYMS TERMINAL v1.0.0</div>
+      </div>
       
-      <div id="qrCode" style="display: none;"></div>
-      
-      <div id="status" style="display: none;"></div>
-      
-      <div id="result" style="display: none;"></div>
-    </div>
-    
-    <div class="card">
-      <h3 style="margin-bottom: 1rem;">📋 Instructions:</h3>
-      <div class="instructions">
-        <ol>
-          <li>Click "Generate Auth QR Code" above</li>
-          <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
-          <li>Navigate to the Auth47 authentication feature</li>
-          <li>Scan the displayed QR code</li>
-          <li>Wait for automatic verification</li>
-        </ol>
+      <div class="terminal-content">
+        <div class="header">
+          <h1>> BIP47 & PAYNYMS SHOWCASE</h1>
+          <div class="subtitle">Explore Bitcoin Payment Codes & Paynym Identity</div>
+          <div class="tagline">Cypherpunk tools for the modern era</div>
+        </div>
+        
+        <div class="card-grid">
+          <a href="/auth" class="card">
+            <div class="card-icon">🔐</div>
+            <div class="card-title">AUTH47 LOGIN</div>
+            <div class="card-description">Bitcoin-based authentication using auth47 protocol</div>
+            <div class="card-action">[AUTHENTICATE]</div>
+          </a>
+          
+          <a href="/lab" class="card">
+              <div class="card-icon">🧪</div>
+              <div class="card-title">BIP47 LAB</div>
+              <div class="card-description">Interactive payment code explorer and simulator</div>
+              <div class="card-action">[EXPERIMENT]</div>
+          </a>
+          
+          <a href="/guestbook" class="card">
+            <div class="card-icon">📖</div>
+            <div class="card-title">GUESTBOOK</div>
+            <div class="card-description">Leave signed messages for the cypherpunk community</div>
+            <div class="card-action">[SIGN MESSAGE]</div>
+          </a>
+          
+          <a href="/paynym" class="card">
+            <div class="card-icon">🔍</div>
+            <div class="card-title">PAYNYM EXPLORER</div>
+            <div class="card-description">Search and explore Paynym identities</div>
+            <div class="card-action">[DISCOVER]</div>
+          </a>
+          
+          <div class="card coming-soon">
+            <div class="coming-soon-badge">SOON</div>
+            <div class="card-icon">📚</div>
+            <div class="card-title">DOCUMENTATION</div>
+            <div class="card-description">Technical docs and API references</div>
+            <div class="card-action">[LEARN]</div>
+          </div>
+          
+          <div class="card coming-soon">
+            <div class="coming-soon-badge">SOON</div>
+            <div class="card-icon">ℹ️</div>
+            <div class="card-title">ABOUT</div>
+            <div class="card-description">Learn about BIP47 and privacy in Bitcoin</div>
+            <div class="card-action">[INFO]</div>
+          </div>
+        </div>
+        
+        <div class="status-bar">
+          <div class="status-line"><span class="status-indicator"></span>SYSTEM STATUS: ONLINE</div>
+          <div class="status-line"><span class="status-indicator"></span>AUTH47 SERVICE: ACTIVE</div>
+          <div class="status-line"><span class="status-indicator"></span>BIP47 PROTOCOL: ENABLED</div>
+          <div class="status-line"><span class="status-indicator"></span>BITCOIN NETWORK: CONNECTED</div>
+        </div>
       </div>
     </div>
     
-    <div class="card">
-      <h3 style="margin-bottom: 1rem;">ℹ️ About</h3>
-      <p style="line-height: 1.6; color: #aaa;">
-        This terminal implements BIP47 Auth47 authentication protocol.
-        It allows wallets to prove ownership of a payment code by
-        signing a challenge with their notification key.
-      </p>
+    <div class="footer">
+      <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
+      <div class="footer-text">Privacy is a fundamental human right</div>
     </div>
   </div>
-
-  <script>
-    let pollInterval = null;
-    let currentNonce = null;
-    
-    async function startAuth() {
-      const btn = document.getElementById('startAuth');
-      const qrDiv = document.getElementById('qrCode');
-      const status = document.getElementById('status');
-      const result = document.getElementById('result');
-      
-      // Clear previous poll
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
-      }
-      
-      btn.disabled = true;
-      status.style.display = 'block';
-      status.className = 'status';
-      status.innerHTML = '<div class="spinner"></div> Generating...';
-      qrDiv.style.display = 'none';
-      result.style.display = 'none';
-      
-      try {
-        const response = await fetch('/start-auth');
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        
-        currentNonce = data.nonce;
-        
-        qrDiv.innerHTML = `
-          <img src="${data.qr}" alt="Auth QR Code">
-          <div class="uri-display">
-            <div class="label">Auth47 URI:</div>
-            <div class="value">${data.uri}</div>
-          </div>
-          <div class="uri-display" style="margin-top: 0.5rem;">
-            <div class="label">Nonce:</div>
-            <div class="value">${data.nonce}</div>
-          </div>
-        `;
-        qrDiv.style.display = 'block';
-        
-        status.className = 'status pending';
-        status.innerHTML = '📱 Waiting for wallet to scan... <div class="spinner"></div>';
-        
-        // Start polling for verification
-        startPolling(data.nonce);
-        
-      } catch (error) {
-        status.className = 'status error';
-        status.innerHTML = `❌ Error: ${error.message}`;
-        btn.disabled = false;
-      }
-    }
-    
-    function startPolling(nonce) {
-      // Poll every 2 seconds
-      pollInterval = setInterval(async () => {
-        try {
-          const response = await fetch(`/check-auth/${nonce}`);
-          const data = await response.json();
-          
-          if (data.status === 'verified') {
-            clearInterval(pollInterval);
-            showSuccess(data);
-          } else if (data.status === 'invalid') {
-            clearInterval(pollInterval);
-            showError('Authentication expired or invalid');
-          }
-          // If pending, keep polling
-        } catch (error) {
-          console.error('Poll error:', error);
-        }
-      }, 2000);
-      
-      // Stop polling after 5 minutes
-      setTimeout(() => {
-        if (pollInterval) {
-          clearInterval(pollInterval);
-          showError('Authentication timeout (5 minutes)');
-        }
-      }, 300000);
-    }
-    
-    function showSuccess(data) {
-      const status = document.getElementById('status');
-      const result = document.getElementById('result');
-      const btn = document.getElementById('startAuth');
-      
-      status.className = 'status success';
-      status.innerHTML = '✅ Authentication Successful!';
-      
-      result.innerHTML = `
-        <h3 style="margin-bottom: 1rem; color: #00ff41;">🎉 Verified Payment Code</h3>
-        <div>
-          <span class="label">Nym:</span>
-          <span class="value">${data.nym}</span>
-        </div>
-        <div>
-          <span class="label">Payment Code:</span>
-          <span class="value">${data.paymentCode}</span>
-        </div>
-      `;
-      result.style.display = 'block';
-      
-      btn.disabled = false;
-    }
-    
-    function showError(message) {
-      const status = document.getElementById('status');
-      const btn = document.getElementById('startAuth');
-      
-      status.className = 'status error';
-      status.innerHTML = `❌ ${message}`;
-      
-      btn.disabled = false;
-    }
-  </script>
 </body>
 </html>

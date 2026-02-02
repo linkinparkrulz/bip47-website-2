@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paynym Explorer - BIP47 Terminal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      color: #00ff41;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+    }
+    
+    /* Terminal Window Styling */
+    .terminal-window {
+      background: #000;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+    }
+    
+    .terminal-header {
+      background: #001100;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #00ff41;
+    }
+    
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .dot-red { background: #ff4444; }
+    .dot-yellow { background: #ffaa00; }
+    .dot-green { background: #00ff41; }
+    
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #00ff41;
+      opacity: 0.8;
+    }
+    
+    .terminal-content {
+      padding: 2rem;
+    }
+    
+    /* Navigation */
+    .nav {
+      margin-bottom: 2rem;
+    }
+    
+    .nav a {
+      color: #00ff41;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+    
+    .nav a:hover {
+      opacity: 1;
+    }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px #00ff41;
+    }
+    
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    
+    /* Search Section */
+    .search-section {
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid #00ff41;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .search-label {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    .search-container {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .search-input {
+      flex: 1;
+      background: #0a0e27;
+      border: 1px solid #00ff41;
+      color: #00ff41;
+      padding: 0.75rem 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      outline: none;
+    }
+    
+    .search-input:focus {
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+    
+    .search-input::placeholder {
+      color: #00ff41;
+      opacity: 0.4;
+    }
+    
+    .search-btn {
+      background: #00ff41;
+      color: #0a0e27;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    
+    .search-btn:hover:not(:disabled) {
+      background: #00cc33;
+      box-shadow: 0 0 15px #00ff41;
+    }
+    
+    .search-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Results Section */
+    .results-section {
+      display: none;
+    }
+    
+    .results-section.visible {
+      display: block;
+    }
+    
+    .result-card {
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid #00ff41;
+      border-radius: 6px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+    }
+    
+    .avatar-container {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #00ff41;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #0a0e27;
+      flex-shrink: 0;
+    }
+    
+    .avatar-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .result-info {
+      flex: 1;
+    }
+    
+    .nym-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #00ff41;
+    }
+    
+    .nym-id {
+      font-size: 0.8rem;
+      color: #888;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stat-box {
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 4px;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #00ff41;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.7rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .codes-section {
+      margin-top: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 0.9rem;
+      color: #00ff41;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+    }
+    
+    .code-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .code-label {
+      font-size: 0.75rem;
+      color: #888;
+    }
+    
+    .code-status {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .status-claimed {
+      background: #00ff41;
+      color: #000;
+    }
+    
+    .status-unclaimed {
+      background: #ffaa00;
+      color: #000;
+    }
+    
+    .code-value {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #00ff41;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    
+    .segwit-badge {
+      font-size: 0.65rem;
+      color: #00ccff;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+    
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 255, 65, 0.3);
+      border-top-color: #00ff41;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    
+    /* Error State */
+    .error {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid #ff4444;
+      border-radius: 6px;
+      padding: 1.5rem;
+      text-align: center;
+      color: #ff4444;
+    }
+    
+    .error-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+    }
+    
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid rgba(0, 255, 65, 0.2);
+      margin-top: 2rem;
+    }
+    
+    .footer-text {
+      font-size: 0.75rem;
+      color: #888;
+      margin: 0.25rem 0;
+    }
+    
+    .footer a {
+      color: #00ff41;
+      text-decoration: none;
+    }
+    
+    /* Followers Grid */
+    .followers-section {
+      margin-top: 1.5rem;
+    }
+    
+    .followers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 600px) {
+      .followers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .follower-card {
+      background: rgba(0, 255, 65, 0.03);
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .follower-card:hover {
+      background: rgba(0, 255, 65, 0.08);
+      border-color: #00ff41;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 65, 0.2);
+    }
+    
+    .follower-avatar {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #00ff41;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 0.75rem;
+      background: #0a0e27;
+    }
+    
+    .follower-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .follower-name {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #00ff41;
+      margin-bottom: 0.25rem;
+      word-break: break-word;
+    }
+    
+    .follower-id {
+      font-size: 0.7rem;
+      color: #888;
+      font-family: monospace;
+    }
+    
+    /* Expand Button */
+    .expand-btn {
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px solid #00ff41;
+      color: #00ff41;
+      padding: 0.75rem 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s;
+      text-align: center;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    .expand-btn:hover {
+      background: rgba(0, 255, 65, 0.1);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    }
+    
+    .expand-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .expanded-content {
+      display: none;
+      margin-top: 1rem;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    .expanded-content.visible {
+      display: block;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Loading State */
+    .followers-loading {
+      text-align: center;
+      padding: 2rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-dot dot-red"></div>
+        <div class="terminal-dot dot-yellow"></div>
+        <div class="terminal-dot dot-green"></div>
+        <div class="terminal-title">PAYNYM EXPLORER v1.0.0</div>
+      </div>
+      
+      <div class="terminal-content">
+        <div class="nav">
+          <a href="/">← Back to Terminal</a>
+        </div>
+        
+        <div class="header">
+          <h1>> PAYNYM EXPLORER</h1>
+          <div class="subtitle">Search and explore Paynym identities</div>
+        </div>
+        
+        <div class="search-section">
+          <label class="search-label">Enter Payment Code, NymID, or NymName:</label>
+          <div class="search-container">
+            <input 
+              type="text" 
+              class="search-input" 
+              id="searchInput"
+              placeholder="PM8T... or nymName or nymID"
+              onkeypress="if(event.key==='Enter') searchPaynym()"
+            >
+            <button class="search-btn" id="searchBtn" onclick="searchPaynym()">
+              SEARCH
+            </button>
+          </div>
+        </div>
+        
+        <div id="resultsContainer" class="results-section">
+          <!-- Results will be populated here -->
+        </div>
+        
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>Enter a payment code, nymID, or nymName to explore</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="footer-text">Data provided by <a href="https://paynym.rs" target="_blank">paynym.rs</a></div>
+      <div class="footer-text">Privacy is a fundamental human right</div>
+    </div>
+  </div>
+
+  <script>
+    async function searchPaynym() {
+      const input = document.getElementById('searchInput');
+      const btn = document.getElementById('searchBtn');
+      const resultsContainer = document.getElementById('resultsContainer');
+      const emptyState = document.getElementById('emptyState');
+      
+      const query = input.value.trim();
+      if (!query) return;
+      
+      // Show loading state
+      btn.disabled = true;
+      btn.textContent = 'SEARCHING...';
+      emptyState.style.display = 'none';
+      resultsContainer.classList.add('visible');
+      resultsContainer.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Searching Paynym database...</div>
+        </div>
+      `;
+      
+      try {
+        const response = await fetch('/api/paynym/lookup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nym: query })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Paynym not found');
+        }
+        
+        displayResults(data);
+      } catch (error) {
+        resultsContainer.innerHTML = `
+          <div class="error">
+            <div class="error-icon">❌</div>
+            <div>${error.message}</div>
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'SEARCH';
+      }
+    }
+    
+    // Store current followers data for expand functionality
+    let currentFollowers = [];
+    
+    async function displayResults(data) {
+      const resultsContainer = document.getElementById('resultsContainer');
+      
+      // Build payment codes HTML
+      const codesHtml = data.codes.map(code => `
+        <div class="code-item">
+          <div class="code-header">
+            <span class="code-label">Payment Code</span>
+            <span class="code-status ${code.claimed ? 'status-claimed' : 'status-unclaimed'}">
+              ${code.claimed ? 'CLAIMED' : 'UNCLAIMED'}
+            </span>
+          </div>
+          <div class="code-value">${code.code}</div>
+          ${code.segwit ? '<span class="segwit-badge">⚡ SEGWIT ENABLED</span>' : ''}
+        </div>
+      `).join('');
+      
+      // Calculate total stats
+      const totalFollowing = data.following ? data.following.length : 0;
+      const totalFollowers = data.followers ? data.followers.length : 0;
+      const totalCodes = data.codes ? data.codes.length : 0;
+      
+      // Use first code for avatar
+      const primaryCode = data.codes && data.codes.length > 0 ? data.codes[0].code : '';
+      const avatarUrl = primaryCode ? `https://paynym.rs/${primaryCode}/avatar` : '';
+      
+      // Build followers section (will be populated async)
+      let followersHtml = '';
+      if (totalFollowers > 0) {
+        followersHtml = `
+          <div class="followers-section">
+            <div class="section-title">Followers (${totalFollowers})</div>
+            <div id="followersGrid" class="followers-grid">
+              <div class="followers-loading">
+                <div class="spinner"></div>
+                <div>Loading followers...</div>
+              </div>
+            </div>
+            <div id="expandedContent" class="expanded-content"></div>
+            ${totalFollowers > 6 ? `<button id="expandBtn" class="expand-btn" onclick="toggleFollowers()">Show all ${totalFollowers} followers</button>` : ''}
+          </div>
+        `;
+      }
+      
+      resultsContainer.innerHTML = `
+        <div class="result-card">
+          <div class="result-header">
+            <div class="avatar-container">
+              <img src="${avatarUrl}" alt="Paynym Avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>🎭</text></svg>'">
+            </div>
+            <div class="result-info">
+              <div class="nym-name">${data.nymName || 'Unknown'}</div>
+              <div class="nym-id">${data.nymID}</div>
+            </div>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-value">${totalCodes}</div>
+              <div class="stat-label">Payment Codes</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${totalFollowers}</div>
+              <div class="stat-label">Followers</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${totalFollowing}</div>
+              <div class="stat-label">Following</div>
+            </div>
+          </div>
+          
+          ${followersHtml}
+          
+          <div class="codes-section">
+            <div class="section-title">Payment Codes</div>
+            ${codesHtml}
+          </div>
+        </div>
+      `;
+      
+      // Fetch follower details if there are followers
+      if (totalFollowers > 0) {
+        await fetchFollowerDetails(data.followers);
+      }
+    }
+    
+    async function fetchFollowerDetails(followers) {
+      const nymIds = followers.map(f => f.nymId);
+      
+      try {
+        const response = await fetch('/api/paynym/followers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nymIds })
+        });
+        
+        const followerDetails = await response.json();
+        currentFollowers = followerDetails;
+        
+        // Display first 6 followers
+        displayFollowersGrid(followerDetails.slice(0, 6));
+        
+        // Prepare expanded content with all followers
+        if (followerDetails.length > 6) {
+          const expandedGrid = document.getElementById('expandedContent');
+          expandedGrid.innerHTML = `<div class="followers-grid">${buildFollowersCards(followerDetails.slice(6))}</div>`;
+        }
+      } catch (error) {
+        console.error('Error fetching follower details:', error);
+        const grid = document.getElementById('followersGrid');
+        if (grid) {
+          grid.innerHTML = '<div style="color: #ff4444; text-align: center;">Failed to load followers</div>';
+        }
+      }
+    }
+    
+    function buildFollowersCards(followers) {
+      return followers.map(follower => `
+        <div class="follower-card" onclick="searchFollower('${follower.nymId}')">
+          <div class="follower-avatar">
+            <img src="${follower.avatarUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>?</text></svg>'}" 
+                 alt="${follower.nymName}"
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>?</text></svg>'">
+          </div>
+          <div class="follower-name">${follower.nymName}</div>
+          <div class="follower-id">${follower.nymId.substring(0, 10)}...</div>
+        </div>
+      `).join('');
+    }
+    
+    function displayFollowersGrid(followers) {
+      const grid = document.getElementById('followersGrid');
+      if (grid) {
+        grid.innerHTML = buildFollowersCards(followers);
+      }
+    }
+    
+    function toggleFollowers() {
+      const expandedContent = document.getElementById('expandedContent');
+      const expandBtn = document.getElementById('expandBtn');
+      
+      if (expandedContent.classList.contains('visible')) {
+        expandedContent.classList.remove('visible');
+        expandBtn.textContent = `Show all ${currentFollowers.length} followers`;
+      } else {
+        expandedContent.classList.add('visible');
+        expandBtn.textContent = 'Show fewer followers';
+      }
+    }
+    
+    function searchFollower(nymId) {
+      document.getElementById('searchInput').value = nymId;
+      searchPaynym();
+    }
+  </script>
+</body>
+</html>

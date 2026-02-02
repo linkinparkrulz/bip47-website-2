@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIP47 Lab - Payment Code Tools</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            color: #00ff41;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: #000;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .terminal-header {
+            background: #001100;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff4444; }
+        .dot-yellow { background: #ffaa00; }
+        .dot-green { background: #00ff41; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #00ff41;
+            opacity: 0.8;
+        }
+
+        .terminal-content { padding: 2rem; }
+
+        /* Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        .back-link {
+            color: #00ff41;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover { opacity: 0.7; }
+
+        h1 {
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Tool Sections */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .tool-grid { grid-template-columns: 1fr; }
+        }
+
+        .tool-panel {
+            background: rgba(0, 255, 65, 0.03);
+            border: 1px solid #00ff41;
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .tool-icon { font-size: 1.25rem; }
+
+        .tool-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #00ff41;
+        }
+
+        /* Form Elements */
+        .input-group { margin-bottom: 1rem; }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #001100;
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            padding: 0.75rem;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        textarea { resize: vertical; min-height: 80px; }
+
+        button {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 0.75rem 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+
+        button:hover:not(:disabled) {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Output Display */
+        .output {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            min-height: 60px;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .output.hidden { display: none; }
+
+        .output-label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .output-content {
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Visual Breakdown */
+        .pc-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .pc-part {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 4px;
+            border-left: 3px solid #00ff41;
+        }
+
+        .pc-part-label {
+            font-size: 0.7rem;
+            color: #888;
+            min-width: 100px;
+            text-transform: uppercase;
+        }
+
+        .pc-part-value {
+            font-size: 0.8rem;
+            color: #00ff41;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        /* Validation Indicators */
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .valid { border-left: 3px solid #00ff41; }
+        .invalid { border-left: 3px solid #ff4444; opacity: 0.7; }
+
+        .status-icon { font-size: 1rem; }
+
+        /* Error Messages */
+        .error-message {
+            color: #ff4444;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-left: 3px solid #ff4444;
+            background: rgba(255, 68, 68, 0.05);
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 65, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ff41;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0, 255, 65, 0.2);
+            margin-top: 2rem;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        /* Scenario Panel Styles */
+        .scenario-panel {
+            background: rgba(0, 20, 10, 0.8);
+            border: 2px solid #00ff41;
+        }
+
+        .scenario-step {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .scenario-step.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        }
+
+        .step-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff41;
+            opacity: 0.6;
+        }
+
+        .step-title {
+            font-size: 1.1rem;
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        .code-visualization {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #001100;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .party-label {
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .arrow {
+            color: #888;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 255, 65, 0.2);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        .progress-dot.completed {
+            background: #00ff41;
+            opacity: 0.5;
+        }
+
+        .tx-out {
+            transition: all 0.3s;
+        }
+
+        .tx-out:hover {
+            transform: translateX(5px);
+        }
+
+        .formula div {
+            margin: 0.25rem 0;
+        }
+
+        .highlight-box {
+            background: rgba(0, 255, 65, 0.05);
+            border-left: 3px solid #00ff41;
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: rgba(255, 170, 0, 0.05);
+            border-left: 3px solid #ffaa00;
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dot dot-red"></div>
+                <div class="terminal-dot dot-yellow"></div>
+                <div class="terminal-dot dot-green"></div>
+                <div class="terminal-title">BIP47 LAB v2.0.0 - EXPERIMENTAL TOOLS</div>
+            </div>
+
+            <div class="terminal-content">
+                <div class="nav-bar">
+                    <a href="/" class="back-link">← RETURN TO TERMINAL</a>
+                    <span style="color: #888; font-size: 0.8rem;">[SYSTEM: ONLINE]</span>
+                </div>
+
+                <h1>> BIP47_LAB.EXE</h1>
+                <div class="subtitle">Payment code validation and interactive BIP47 payment flow demonstration</div>
+
+                <!-- Interactive Scenario Panel -->
+                <div class="tool-panel scenario-panel" style="margin-top: 1.5rem;">
+                    <div class="tool-header">
+                        <span class="tool-icon">🎭</span>
+                        <span class="tool-title">Interactive Scenario: Alice Pays Bob</span>
+                    </div>
+                    <div class="scenario-intro" style="margin-bottom: 1rem; color: #888; font-size: 0.9rem;">
+                        Walk through a complete BIP47 payment flow. See how payment codes enable private, reusable payments without address reuse.
+                    </div>
+
+                    <div class="scenario-steps">
+                        <!-- Step 1: Setup -->
+                        <div class="scenario-step" id="step-1" data-step="1">
+                            <div class="step-header">
+                                <span class="step-number">01</span>
+                                <span class="step-title">Exchange Payment Codes</span>
+                            </div>
+                            <div class="step-content">
+                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
+                                    Alice gets Bob's payment code from his donation page. This contains Bob's xpub at path <code>m/47'</code>.
+                                </p>
+                                <div class="code-visualization">
+                                    <div class="party-label" style="color: #ff66b2;">Alice (Sender)</div>
+                                    <div class="arrow">→ requests payment code from →</div>
+                                    <div class="party-label" style="color: #66b2ff;">Bob (Receiver)</div>
+                                </div>
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Bob's Payment Code (from donation page)</label>
+                                    <input type="text" id="scenario-bob-pc"
+                                           value="PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5mxDex7R8ttgtL1tGAt2TshZAoFeB5zn4c9nRo4oZpmuyuo4FTpUrd"
+                                           readonly style="font-size: 0.75rem;">
+                                </div>
+                                <button onclick="nextStep(2)">Initialize Payment Channel →</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Notification Transaction -->
+                        <div class="scenario-step hidden" id="step-2" data-step="2">
+                            <div class="step-header">
+                                <span class="step-number">02</span>
+                                <span class="step-title">Create Notification Transaction</span>
+                            </div>
+                            <div class="step-content">
+                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
+                                    Alice creates a shared secret using ECDH: <code>S = k × B</code>, where <code>k</code> is her UTXO private key and <code>B</code> is Bob's notification public key.
+                                </p>
+
+                                <div class="math-visualization" style="background: rgba(0,255,65,0.05); padding: 1rem; border-radius: 4px; margin: 1rem 0; font-family: monospace; font-size: 0.8rem;">
+                                    <div style="margin-bottom: 0.5rem;">
+                                        <span style="color: #ff66b2;">Alice's UTXO key (k)</span> ×
+                                        <span style="color: #66b2ff;">Bob's notif key (B)</span> =
+                                        <span style="color: #ffff66;">Shared Secret (S)</span>
+                                    </div>
+                                    <div id="shared-secret-display" style="color: #ffff66; word-break: break-all;">
+                                        Calculating...
+                                    </div>
+                                </div>
+
+                                <div class="highlight-box" style="margin: 1rem 0; font-size: 0.8rem;">
+                                    <strong>Why this matters:</strong> Using ECDH, Alice and Bob can share a secret without transmitting an encryption key. Only Bob can decrypt Alice's payment code because only he holds private key <code>b</code>.
+                                </div>
+
+                                <div class="tx-output-preview" style="margin: 1rem 0;">
+                                    <div class="output-label">Transaction Structure</div>
+                                    <div class="tx-outputs" style="font-size: 0.8rem;">
+                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(255,200,0,0.1); border-left: 3px solid #ffaa00; margin-bottom: 0.5rem;">
+                                            <strong>OP_RETURN</strong> (80 bytes encrypted payload)<br>
+                                            <span style="color: #888; font-size: 0.75rem;">Contains Alice's encrypted payment code</span>
+                                        </div>
+                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(102,178,255,0.1); border-left: 3px solid #66b2ff; margin-bottom: 0.5rem;">
+                                            <strong>Output 1</strong> → Bob's notification address (546 sats)<br>
+                                            <span style="color: #888; font-size: 0.75rem;">Alerts Bob that someone opened a channel</span>
+                                        </div>
+                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(255,102,178,0.1); border-left: 3px solid #ff66b2;">
+                                            <strong>Output 2</strong> → Alice's change address<br>
+                                            <span style="color: #888; font-size: 0.75rem;">Remaining balance minus fees</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="nextStep(3)">Broadcast Notification TX →</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Derive Payment Addresses -->
+                        <div class="scenario-step hidden" id="step-3" data-step="3">
+                            <div class="step-header">
+                                <span class="step-number">03</span>
+                                <span class="step-title">Derive Payment Addresses</span>
+                            </div>
+                            <div class="step-content">
+                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
+                                    After the notification transaction confirms, Alice can generate unique payment addresses for Bob using the formula: <code>K = B + sG</code>
+                                </p>
+
+                                <div class="derivation-visualization" style="margin: 1rem 0;">
+                                    <div class="formula" style="font-family: monospace; background: #001100; padding: 1rem; border: 1px solid #00ff41; border-radius: 4px; font-size: 0.8rem; margin-bottom: 1rem;">
+                                        <div style="color: #888;">// For each payment i:</div>
+                                        <div>B = Bob's xpub at index i</div>
+                                        <div>S = a × B</div>
+                                        <div>s = SHA256(S<sub>x</sub>)</div>
+                                        <div>sG = s × G</div>
+                                        <div style="color: #00ff41;">K = B + sG ← Payment address public key</div>
+                                    </div>
+
+                                    <div class="address-list" id="derived-addresses" style="margin: 1rem 0;">
+                                        <div class="output-label">Derived Payment Addresses</div>
+                                    </div>
+                                </div>
+
+                                <div class="warning-box" style="margin: 1rem 0; font-size: 0.8rem;">
+                                    <strong>Important:</strong> Some indices produce invalid points outside the curve. These are skipped automatically. Notice address indices may not be sequential (0, 1, 2, 5, 6...).
+                                </div>
+
+                                <button onclick="nextStep(4)">Make Payment →</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Bob Receives -->
+                        <div class="scenario-step hidden" id="step-4" data-step="4">
+                            <div class="step-header">
+                                <span class="step-number">04</span>
+                                <span class="step-title">Bob Receives & Spends</span>
+                            </div>
+                            <div class="step-content">
+                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
+                                    Bob monitors his notification address and sees Alice's transaction. He derives the same addresses using: <code>k = b + s</code>
+                                </p>
+
+                                <div class="private-key-derivation" style="background: rgba(255,68,68,0.05); border: 1px solid #ff4444; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+                                    <div class="output-label" style="color: #ff4444;">Private Key Derivation (Bob only)</div>
+                                    <div style="font-family: monospace; font-size: 0.8rem; margin-top: 0.5rem;">
+                                        <div style="color: #888;">// Bob calculates:</div>
+                                        <div>b = Bob's private key at index i</div>
+                                        <div>S = b × A</div>
+                                        <div>s = SHA256(S<sub>x</sub>)</div>
+                                        <div style="color: #ff4444;">k = b + s ← Private key to spend</div>
+                                    </div>
+                                </div>
+
+                                <div class="highlight-box" style="margin: 1rem 0; font-size: 0.8rem;">
+                                    <strong>Key Insight:</strong> Alice can generate addresses and send payments, but <em>only Bob can spend them</em> because only he knows private key <code>b</code>. This is the magic of BIP47—one-way address derivation.
+                                </div>
+
+                                <div class="summary-stats" id="receiving-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
+                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">1</div>
+                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Notification TX</div>
+                                    </div>
+                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
+                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">∞</div>
+                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Payment Addresses</div>
+                                    </div>
+                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(255,100,100,0.05); border-radius: 4px;">
+                                        <div class="stat-value" style="font-size: 1.5rem; color: #ff6666;">0</div>
+                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Address Reuse</div>
+                                    </div>
+                                </div>
+
+                                <button onclick="resetScenario()">↻ Run Scenario Again</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scenario-progress" style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: center;">
+                        <div class="progress-dot active" data-step="1"></div>
+                        <div class="progress-dot" data-step="2"></div>
+                        <div class="progress-dot" data-step="3"></div>
+                        <div class="progress-dot" data-step="4"></div>
+                    </div>
+                </div>
+
+                <div class="tool-grid" style="margin-top: 1.5rem;">
+                    <!-- Validator Tool -->
+                    <div class="tool-panel">
+                        <div class="tool-header">
+                            <span class="tool-icon">✓</span>
+                            <span class="tool-title">Payment Code Validator</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Payment Code to Validate</label>
+                            <input type="text" id="validate-input" placeholder="PM8TJKRY...">
+                        </div>
+                        <button id="validate-btn" onclick="validatePaymentCode()">
+                            VALIDATE CODE
+                        </button>
+                        <div id="validate-output" class="output hidden">
+                            <div class="validation-grid" id="validate-result"></div>
+                        </div>
+                        <div id="validate-error" class="error-message hidden"></div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-text">Payment codes are reusable and privacy-preserving</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Utility: Show/hide elements
+        const show = (id) => document.getElementById(id).classList.remove('hidden');
+        const hide = (id) => document.getElementById(id).classList.add('hidden');
+        const setLoading = (btnId, loading) => {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span>PROCESSING...';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = btn.getAttribute('data-original-text') || btn.innerText;
+            }
+        };
+
+        // Store original button texts
+        document.querySelectorAll('button').forEach(btn => {
+            btn.setAttribute('data-original-text', btn.innerText);
+        });
+
+        // API Pattern 2: POST with JSON (as per AGENTS.md)
+        async function apiPost(endpoint, body) {
+            console.log(`🔍 API Request: ${endpoint}`);
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const text = await response.text();
+            if (!text || text.trim() === '') {
+                throw new Error('Empty response from server');
+            }
+
+            const data = JSON.parse(text);
+            if (!response.ok) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            console.log(`✅ API Response success: ${endpoint}`);
+            return data;
+        }
+
+        // Tool 1: Validate Payment Code
+        async function validatePaymentCode() {
+            const paymentCode = document.getElementById('validate-input').value.trim();
+
+            hide('validate-output');
+            hide('validate-error');
+
+            if (!paymentCode) {
+                show('validate-error');
+                document.getElementById('validate-error').textContent = '❌ Payment code required';
+                return;
+            }
+
+            setLoading('validate-btn', true);
+
+            try {
+                console.log('🔍 Validating payment code...');
+                const data = await apiPost('/api/bip47/validate', { paymentCode });
+
+                const grid = document.getElementById('validate-result');
+                grid.innerHTML = Object.entries(data.checks).map(([check, valid]) => `
+                    <div class="validation-item ${valid ? 'valid' : 'invalid'}">
+                        <span class="status-icon">${valid ? '✓' : '✗'}</span>
+                        <span>${check}: ${valid ? 'PASS' : 'FAIL'}</span>
+                    </div>
+                `).join('');
+
+                if (data.valid) {
+                    grid.innerHTML += `
+                        <div class="validation-item valid" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                            <span class="status-icon">✓</span>
+                            <span>Valid BIP47 Payment Code v1</span>
+                        </div>
+                    `;
+                }
+
+                show('validate-output');
+                console.log(`✅ Validation complete: ${data.valid ? 'VALID' : 'INVALID'}`);
+            } catch (error) {
+                console.error('💥 Validation error:', error);
+                document.getElementById('validate-error').textContent = `❌ ${error.message}`;
+                show('validate-error');
+            } finally {
+                setLoading('validate-btn', false);
+            }
+        }
+
+        // Enter key support for inputs
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const btn = input.closest('.tool-panel').querySelector('button');
+                    if (btn) btn.click();
+                }
+            });
+        });
+
+        console.log('✅ BIP47 Lab initialized');
+        console.log('🔍 Ready for payment code operations');
+
+        // Scenario navigation
+        function nextStep(step) {
+            // Hide current
+            document.querySelectorAll('.scenario-step').forEach(el => el.classList.add('hidden'));
+            // Show new
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, idx) => {
+                dot.classList.remove('active');
+                if (idx + 1 < step) dot.classList.add('completed');
+                if (idx + 1 === step) dot.classList.add('active');
+            });
+
+            // Generate sample data for step 2
+            if (step === 2) {
+                setTimeout(() => {
+                    document.getElementById('shared-secret-display').textContent =
+                        '03' + Array(64).fill(0).map(() => Math.floor(Math.random()*16).toString(16)).join('');
+                }, 800);
+            }
+
+            // Generate addresses for step 3
+            if (step === 3) {
+                generateSampleAddresses();
+            }
+
+            console.log(`✅ Advanced to scenario step ${step}`);
+        }
+
+        function generateSampleAddresses() {
+            const list = document.getElementById('derived-addresses');
+            list.innerHTML = '<div class="output-label">Derived Payment Addresses</div>';
+
+            const addresses = [
+                { idx: 0, addr: 'tb1q8gpft5rpju8lcshfa6at44pev5y0q7kzfwqpg' },
+                { idx: 1, addr: 'tb1qes6funanqdkwk39zfwmzfnjuz3xt6apeltyhv5' },
+                { idx: 2, addr: 'tb1q82pufc4zyhdtzemuqlaf2f2tgsy5jex6xf20r0' },
+                { idx: 5, addr: 'tb1qmgdad8lwvm96grz5dy5yppmt5nxk5g38jftz8d' },
+                { idx: 6, addr: 'tb1qdku0qjt7jy9hu6k5nt88sk52ddlzl6pnkg64m7' }
+            ];
+
+            addresses.forEach((a, i) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'padding: 0.5rem; background: rgba(0,255,65,0.05); margin: 0.25rem 0; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; animation: slideIn 0.3s ease;';
+                    div.innerHTML = `
+                        <span style="color: #888;">#${a.idx}</span>
+                        <span style="color: #00ff41; font-family: monospace;">${a.addr}</span>
+                    `;
+                    list.appendChild(div);
+                }, i * 200);
+            });
+        }
+
+        function resetScenario() {
+            document.querySelectorAll('.scenario-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById('step-1').classList.remove('hidden');
+            document.querySelectorAll('.progress-dot').forEach(dot => {
+                dot.classList.remove('active', 'completed');
+            });
+            document.querySelector('.progress-dot[data-step="1"]').classList.add('active');
+            console.log('✅ Scenario reset to step 1');
+        }
+    </script>
+</body>
+</html>
