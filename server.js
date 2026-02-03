@@ -101,6 +101,11 @@ app.get('/start-auth', async (req, res) => {
 
 // Check auth status (polling endpoint)
 app.get('/check-auth/:nonce', (req, res) => {
+  // Disable caching to ensure fresh auth status
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  
   const { nonce } = req.params;
   const auth = pendingAuths.get(nonce);
   
