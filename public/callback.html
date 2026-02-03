@@ -19,30 +19,67 @@
     }
     
     .container {
-      max-width: 600px;
+      max-width: 700px;
       text-align: center;
     }
     
     h1 {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      animation: bounce 1s ease-in-out;
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      animation: bounce 0.6s ease-in-out;
     }
     
     @keyframes bounce {
       0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-30px); }
-      60% { transform: translateY(-15px); }
+      40% { transform: translateY(-20px); }
+      60% { transform: translateY(-10px); }
+    }
+    
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #00ff41;
+      margin: 1.5rem auto;
+      display: none;
+      object-fit: cover;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+    
+    .avatar.show {
+      display: block;
     }
     
     p {
-      font-size: 1.2rem;
-      line-height: 1.8;
-      margin: 1rem 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin: 0.8rem 0;
+      color: #00ff41;
     }
     
-    .success { color: #00ff41; }
-    .info { color: #888; }
+    .success { color: #00ff41; font-weight: bold; }
+    .nym-name { 
+      color: #00ff41; 
+      font-size: 1.4rem; 
+      margin: 1rem 0;
+    }
+    .payment-code { 
+      color: #888; 
+      font-size: 0.9rem; 
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+      margin: 0.5rem 0;
+      background: rgba(0, 255, 65, 0.1);
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 255, 65, 0.3);
+    }
+    .countdown { 
+      color: #00ff41; 
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 1.5rem 0;
+    }
     
     .spinner {
       display: inline-block;
@@ -52,23 +89,206 @@
       border-top-color: #00ff41;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 2rem auto;
+      margin: 1.5rem auto;
     }
     
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    .return-btn {
+      background: #00ff41;
+      color: #0a0e27;
+      border: none;
+      padding: 1rem 2rem;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .return-btn:hover {
+      background: #00cc33;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+    
+    .error { color: #ff4444; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✅</h1>
-    <p class="success">Authentication callback received!</p>
-    <div class="spinner"></div>
-    <p class="info">Processing verification...</p>
-    <p class="info" style="font-size: 0.9rem; margin-top: 2rem;">
-      You can close this window and return to the terminal.
-    </p>
+  <div class="container" id="container">
+    <h1 id="status-icon">⏳</h1>
+    <p id="status-text" class="success">Verifying authentication...</p>
+    <div class="spinner" id="spinner"></div>
+    
+    <div id="success-content" class="hidden">
+      <img id="avatar" class="avatar" alt="Paynym Avatar">
+      <p class="nym-name" id="nym-name"></p>
+      <p class="payment-code" id="payment-code"></p>
+      <p class="countdown">
+        Redirecting to terminal in <span id="countdown-timer">10</span> seconds...
+      </p>
+      <a href="/auth" class="return-btn">Return to Terminal Now</a>
+    </div>
+    
+    <div id="error-content" class="hidden">
+      <p class="error">❌ Authentication Failed</p>
+      <p>Invalid signature or expired challenge</p>
+      <a href="/auth" class="return-btn">Return to Auth Page</a>
+    </div>
   </div>
+
+  <script>
+    const NONCE_PARAM = 'nonce';
+    const COUNTDOWN_SECONDS = 10;
+    
+    // Get nonce from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nonce = urlParams.get(NONCE_PARAM);
+    
+    if (!nonce) {
+      showError('Missing nonce parameter');
+      return;
+    }
+    
+    console.log('🔍 Verifying authentication for nonce:', nonce);
+    
+    // Poll for auth status
+    let attempts = 0;
+    const maxAttempts = 20; // 10 seconds at 500ms intervals
+    const pollInterval = 500;
+    
+    const pollAuthStatus = async () => {
+      try {
+        const response = await fetch(`/check-auth/${nonce}`);
+        const data = await response.json();
+        
+        console.log('📊 Auth status:', data);
+        
+        if (data.status === 'verified') {
+          showSuccess(data);
+          return;
+        }
+        
+        if (data.status === 'invalid') {
+          showError('Invalid or expired authentication');
+          return;
+        }
+        
+        // Still pending, continue polling
+        attempts++;
+        if (attempts >= maxAttempts) {
+          showError('Authentication timeout');
+          return;
+        }
+        
+        setTimeout(pollAuthStatus, pollInterval);
+        
+      } catch (error) {
+        console.error('❌ Polling error:', error);
+        showError('Failed to verify authentication');
+      }
+    };
+    
+    const showSuccess = (data) => {
+      console.log('✅ Authentication verified:', data);
+      
+      // Hide spinner, show success content
+      document.getElementById('spinner').classList.add('hidden');
+      document.getElementById('status-text').textContent = 'Authentication Successful!';
+      document.getElementById('status-icon').textContent = '✅';
+      
+      const successContent = document.getElementById('success-content');
+      successContent.classList.remove('hidden');
+      
+      // Display nym name
+      if (data.nym) {
+        document.getElementById('nym-name').textContent = data.nym;
+      }
+      
+      // Display payment code
+      if (data.paymentCode) {
+        document.getElementById('payment-code').textContent = data.paymentCode;
+      }
+      
+      // Fetch and display avatar
+      fetchPaynymAvatar(data.nym);
+      
+      // Start countdown
+      startCountdown();
+    };
+    
+    const fetchPaynymAvatar = async (nym) => {
+      try {
+        const response = await fetch('/api/paynym/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nym })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Get primary payment code for avatar
+          const primaryCode = data.codes && data.codes.length > 0 
+            ? data.codes[0].code 
+            : null;
+          
+          if (primaryCode) {
+            const avatarUrl = `https://paynym.rs/${primaryCode}/avatar`;
+            console.log('🖼️  Avatar URL:', avatarUrl);
+            
+            const avatarImg = document.getElementById('avatar');
+            avatarImg.src = avatarUrl;
+            avatarImg.classList.add('show');
+            
+            // Handle avatar load error
+            avatarImg.onerror = () => {
+              console.log('⚠️  Failed to load avatar');
+              avatarImg.classList.remove('show');
+            };
+          }
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch Paynym details:', error);
+      }
+    };
+    
+    const showError = (message) => {
+      console.error('❌ Error:', message);
+      
+      // Hide spinner, show error content
+      document.getElementById('spinner').classList.add('hidden');
+      document.getElementById('status-text').textContent = message;
+      document.getElementById('status-icon').textContent = '❌';
+      document.getElementById('status-text').classList.add('error');
+      
+      const errorContent = document.getElementById('error-content');
+      errorContent.classList.remove('hidden');
+    };
+    
+    const startCountdown = () => {
+      let seconds = COUNTDOWN_SECONDS;
+      const timerElement = document.getElementById('countdown-timer');
+      
+      const countdown = setInterval(() => {
+        seconds--;
+        timerElement.textContent = seconds;
+        
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          console.log('🔄 Redirecting to /auth');
+          window.location.href = '/auth';
+        }
+      }, 1000);
+    };
+    
+    // Start polling
+    pollAuthStatus();
+  </script>
 </body>
 </html>
