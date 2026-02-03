@@ -220,10 +220,17 @@ app.post('/verify', async (req, res) => {
     
     console.log(`🔐 Message hash: ${messageHash.toString('hex')}`);
     
-    // Decode signature from base64
-    const signatureBuffer = Buffer.from(signature, 'base64');
+    // Decode signature from base64. Wallets typically send a 65-byte compact signature
+    // (64 bytes + 1-byte recovery id). @bitcoinerlab/secp256k1 verify expects a 64-byte
+    // signature (r||s) or DER, so we must strip the recovery byte if present.
+    let signatureBuffer = Buffer.from(signature, 'base64');
     console.log(`✍️  Signature length: ${signatureBuffer.length}`);
-    
+
+    if (signatureBuffer.length === 65) {
+      signatureBuffer = signatureBuffer.subarray(0, 64);
+      console.log('ℹ️  Stripped recovery byte from signature (65 → 64)');
+    }
+
     // Verify signature
     const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
     
@@ -340,9 +347,16 @@ app.post('/callback', async (req, res) => {
       
       console.log(`🔐 Callback message hash: ${messageHash.toString('hex')}`);
       
-      // Decode signature from base64
-      const signatureBuffer = Buffer.from(signature, 'base64');
+      // Decode signature from base64. Wallets typically send a 65-byte compact signature
+      // (64 bytes + 1-byte recovery id). @bitcoinerlab/secp256k1 verify expects a 64-byte
+      // signature (r||s) or DER, so we must strip the recovery byte if present.
+      let signatureBuffer = Buffer.from(signature, 'base64');
       console.log(`✍️  Callback signature length: ${signatureBuffer.length}`);
+
+      if (signatureBuffer.length === 65) {
+        signatureBuffer = signatureBuffer.subarray(0, 64);
+        console.log('ℹ️  Callback stripped recovery byte from signature (65 → 64)');
+      }
       
       // Verify signature
       const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
