@@ -357,12 +357,12 @@ app.post('/callback', async (req, res) => {
         
         console.log(`🎉 Authentication successful via callback for ${nym}`);
         
-        // Serve the success page
-        res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+        // Redirect to callback page with nonce parameter so it can poll auth status
+        return res.redirect(`/callback?nonce=${nonce}`);
       } else {
         console.log('❌ Callback verification failed: Invalid signature');
-        // Still serve the callback page
-        res.sendFile(path.join(__dirname, 'public', 'callback.html'));
+        // Redirect to callback page with nonce for error display
+        return res.redirect(`/callback?nonce=${nonce}`);
       }
     } catch (verifyError) {
       console.log('❌ Callback verification error:', verifyError.message);
