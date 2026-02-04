@@ -201,39 +201,65 @@
     
     .result {
       margin-top: 1rem;
-      padding: 1.5rem;
+      padding: 2rem;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 4px;
       border: 1px solid #00ff41;
+      text-align: center;
     }
     
     .result-title {
-      font-size: 1rem;
+      font-size: 2.5rem;
       color: #00ff41;
       margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+      animation: bounce 0.6s ease-in-out;
     }
     
-    .result-item {
-      margin: 0.75rem 0;
-      padding: 0.75rem;
-      background: rgba(0, 255, 65, 0.05);
-      border-radius: 4px;
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-20px); }
+      60% { transform: translateY(-10px); }
     }
     
-    .result-label {
-      color: #888;
-      font-size: 0.75rem;
-      margin-bottom: 0.25rem;
-      text-transform: uppercase;
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #00ff41;
+      margin: 1.5rem auto;
+      display: none;
+      object-fit: cover;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
     }
     
-    .result-value {
-      color: #00ff41;
+    .avatar.show {
+      display: block;
+    }
+    
+    .nym-name { 
+      color: #00ff41; 
+      font-size: 1.4rem; 
+      margin: 1rem 0;
+    }
+    
+    .payment-code { 
+      color: #888; 
+      font-size: 0.85rem; 
       word-break: break-all;
-      font-family: monospace;
-      font-size: 0.85rem;
+      font-family: 'Courier New', monospace;
+      margin: 0.5rem auto;
+      background: rgba(0, 255, 65, 0.1);
+      padding: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      max-width: 600px;
+    }
+    
+    .countdown { 
+      color: #00ff41; 
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin: 1.5rem 0;
     }
     
     .instructions {
@@ -319,7 +345,15 @@
           
           <div id="status" style="display: none;"></div>
           
-          <div id="result" style="display: none;"></div>
+          <div id="result" style="display: none;">
+            <div class="result-title" id="result-icon">✅</div>
+            <img id="avatar" class="avatar" alt="Paynym Avatar">
+            <p class="nym-name" id="nym-name"></p>
+            <p class="payment-code" id="payment-code"></p>
+            <p class="countdown">
+              Resetting in <span id="countdown-timer">10</span> seconds...
+            </p>
+          </div>
         </div>
         
         <div class="instructions">
@@ -344,6 +378,8 @@
   <script>
     let pollInterval = null;
     let currentNonce = null;
+    let countdownInterval = null;
+    const COUNTDOWN_SECONDS = 10;
     
     async function startAuth() {
       const btn = document.getElementById('startAuth');
@@ -351,10 +387,14 @@
       const status = document.getElementById('status');
       const result = document.getElementById('result');
       
-      // Clear previous poll
+      // Clear previous poll and countdown
       if (pollInterval) {
         clearInterval(pollInterval);
         pollInterval = null;
+      }
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
       }
       
       btn.disabled = true;
@@ -433,25 +473,107 @@
       const status = document.getElementById('status');
       const result = document.getElementById('result');
       const btn = document.getElementById('startAuth');
+      const qrDiv = document.getElementById('qrCode');
+      
+      // Hide QR code
+      qrDiv.style.display = 'none';
       
       status.className = 'status success';
       status.innerHTML = '✅ Authentication Successful!';
       
-      result.innerHTML = `
-        <div class="result-title">🎉 Verified Payment Code</div>
-        <div class="result-item">
-          <div class="result-label">Nym:</div>
-          <div class="result-value">${data.nym}</div>
-        </div>
-        <div class="result-item">
-          <div class="result-label">Payment Code:</div>
-          <div class="result-value">${data.paymentCode}</div>
-        </div>
-      `;
       result.style.display = 'block';
       
-      btn.disabled = false;
+      // Display nym name
+      if (data.nym) {
+        document.getElementById('nym-name').textContent = data.nym;
+      }
+      
+      // Display payment code
+      if (data.paymentCode) {
+        document.getElementById('payment-code').textContent = data.paymentCode;
+      }
+      
+      // Fetch and display avatar
+      fetchPaynymAvatar(data.nym);
+      
+      // Start countdown to reset
+      startCountdown();
     }
+    
+    const fetchPaynymAvatar = async (nym) => {
+      try {
+        const response = await fetch('/api/paynym/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nym })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Get primary payment code for avatar
+          const primaryCode = data.codes && data.codes.length > 0 
+            ? data.codes[0].code 
+            : null;
+          
+          if (primaryCode) {
+            const avatarUrl = `https://paynym.rs/${primaryCode}/avatar`;
+            console.log('🖼️  Avatar URL:', avatarUrl);
+            
+            const avatarImg = document.getElementById('avatar');
+            avatarImg.src = avatarUrl;
+            avatarImg.classList.add('show');
+            
+            // Handle avatar load error
+            avatarImg.onerror = () => {
+              console.log('⚠️  Failed to load avatar');
+              avatarImg.classList.remove('show');
+            };
+          }
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch Paynym details:', error);
+      }
+    };
+    
+    const startCountdown = () => {
+      const btn = document.getElementById('startAuth');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const timerElement = document.getElementById('countdown-timer');
+      
+      let seconds = COUNTDOWN_SECONDS;
+      timerElement.textContent = seconds;
+      
+      countdownInterval = setInterval(() => {
+        seconds--;
+        timerElement.textContent = seconds;
+        
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          resetAuthUI();
+        }
+      }, 1000);
+    };
+    
+    const resetAuthUI = () => {
+      const btn = document.getElementById('startAuth');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const qrDiv = document.getElementById('qrCode');
+      const avatarImg = document.getElementById('avatar');
+      
+      // Re-enable button
+      btn.disabled = false;
+      
+      // Hide status, result, and avatar
+      status.style.display = 'none';
+      result.style.display = 'none';
+      avatarImg.classList.remove('show');
+      avatarImg.src = '';
+      
+      console.log('🔄 Auth UI reset - ready for new authentication');
+    };
     
     function showError(message) {
       const status = document.getElementById('status');
