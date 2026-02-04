@@ -5,6 +5,7 @@ import { MongoClient } from 'mongodb';
 import ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
 import { BIP47Factory } from '@samouraiwallet/bip47';
+import { Auth47Verifier } from '@samouraiwallet/auth47';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import path from 'path';
@@ -52,6 +53,9 @@ const bip47 = BIP47Factory(ecc);
 
 // Dynamic callback URL for production deployment
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/callback`;
+
+// Initialize Auth47 Verifier
+const verifier = new Auth47Verifier(ecc, CALLBACK_URL);
 
 
 // Store pending authentications (use Redis/DB in production)
@@ -206,37 +210,10 @@ app.post('/verify', async (req, res) => {
       });
     }
     
-    // Parse payment code
-    console.log(`🔑 Parsing payment code: ${nym}`);
-    const paymentCode = bip47.fromBase58(nym);
-    const notificationPubKey = paymentCode.getNotificationPublicKey();
+    // Verify signature using Auth47 library (Bitcoin Message Signing protocol)
+    const verifiedProof = verifier.verifyProof(req.body, 'bitcoin');
     
-    console.log(`📋 Notification pubkey length: ${notificationPubKey.length}`);
-    
-    // Create message hash from challenge
-    const messageHash = crypto.createHash('sha256')
-      .update(challenge)
-      .digest();
-    
-    console.log(`🔐 Message hash: ${messageHash.toString('hex')}`);
-    
-    // Decode signature from base64. Wallets typically send a 65-byte compact signature
-    // (64 bytes + 1-byte recovery id). @bitcoinerlab/secp256k1 verify expects a 64-byte
-    // signature (r||s) or DER, so we must strip the recovery byte if present.
-    let signatureBuffer = Buffer.from(signature, 'base64');
-    console.log(`✍️  Signature length: ${signatureBuffer.length}`);
-
-    if (signatureBuffer.length === 65) {
-      signatureBuffer = signatureBuffer.subarray(0, 64);
-      console.log('ℹ️  Stripped recovery byte from signature (65 → 64)');
-    }
-
-    // Verify signature
-    const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
-    
-    console.log(`${isValid ? '✅' : '❌'} Signature verification: ${isValid}`);
-    
-    if (isValid) {
+    if (verifiedProof.result === 'ok') {
       // Mark as verified
       auth.verified = true;
       auth.nym = nym;
@@ -250,10 +227,10 @@ app.post('/verify', async (req, res) => {
         payment_code: nym
       });
     } else {
-      console.error('❌ Invalid signature');
+      console.error(`❌ Invalid signature: ${verifiedProof.error}`);
       res.json({
         result: 'error',
-        error: 'Invalid signature'
+        error: verifiedProof.error
       });
     }
   } catch (error) {
@@ -331,39 +308,11 @@ app.post('/callback', async (req, res) => {
       return res.sendFile(path.join(__dirname, 'public', 'callback.html'));
     }
     
-    // Manual signature verification (same as /verify endpoint)
+    // Verify signature using Auth47 library (Bitcoin Message Signing protocol)
     try {
-      // Parse payment code
-      console.log(`🔑 Parsing payment code in callback: ${nym}`);
-      const paymentCode = bip47.fromBase58(nym);
-      const notificationPubKey = paymentCode.getNotificationPublicKey();
+      const verifiedProof = verifier.verifyProof(req.body, 'bitcoin');
       
-      console.log(`📋 Callback notification pubkey length: ${notificationPubKey.length}`);
-      
-      // Create message hash from challenge
-      const messageHash = crypto.createHash('sha256')
-        .update(challenge)
-        .digest();
-      
-      console.log(`🔐 Callback message hash: ${messageHash.toString('hex')}`);
-      
-      // Decode signature from base64. Wallets typically send a 65-byte compact signature
-      // (64 bytes + 1-byte recovery id). @bitcoinerlab/secp256k1 verify expects a 64-byte
-      // signature (r||s) or DER, so we must strip the recovery byte if present.
-      let signatureBuffer = Buffer.from(signature, 'base64');
-      console.log(`✍️  Callback signature length: ${signatureBuffer.length}`);
-
-      if (signatureBuffer.length === 65) {
-        signatureBuffer = signatureBuffer.subarray(0, 64);
-        console.log('ℹ️  Callback stripped recovery byte from signature (65 → 64)');
-      }
-      
-      // Verify signature
-      const isValid = ecc.verify(messageHash, notificationPubKey, signatureBuffer);
-      
-      console.log(`${isValid ? '✅' : '❌'} Callback signature verification: ${isValid}`);
-      
-      if (isValid) {
+      if (verifiedProof.result === 'ok') {
         // Mark as verified
         auth.verified = true;
         auth.nym = nym;
@@ -374,7 +323,7 @@ app.post('/callback', async (req, res) => {
         // Redirect to callback page with nonce parameter so it can poll auth status
         return res.redirect(`/callback?nonce=${nonce}`);
       } else {
-        console.log('❌ Callback verification failed: Invalid signature');
+        console.log(`❌ Callback verification failed: ${verifiedProof.error}`);
         // Redirect to callback page with nonce for error display
         return res.redirect(`/callback?nonce=${nonce}`);
       }
