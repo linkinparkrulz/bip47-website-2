@@ -379,6 +379,7 @@
     let pollInterval = null;
     let currentNonce = null;
     let countdownInterval = null;
+    let fetchedPaynymName = null;
     const COUNTDOWN_SECONDS = 10;
     
     async function startAuth() {
@@ -511,6 +512,9 @@
         if (response.ok) {
           const data = await response.json();
           
+          // Store the nymName from API response
+          fetchedPaynymName = data.nymName || null;
+          
           // Get primary payment code for avatar
           const primaryCode = data.codes && data.codes.length > 0 
             ? data.codes[0].code 
@@ -519,6 +523,7 @@
           if (primaryCode) {
             const avatarUrl = `https://paynym.rs/${primaryCode}/avatar`;
             console.log('🖼️  Avatar URL:', avatarUrl);
+            console.log('📛 Paynym Name:', fetchedPaynymName);
             
             const avatarImg = document.getElementById('avatar');
             avatarImg.src = avatarUrl;
@@ -529,6 +534,11 @@
               console.log('⚠️  Failed to load avatar');
               avatarImg.classList.remove('show');
             };
+          }
+          
+          // Update the nym-name display with the fetched Paynym name
+          if (fetchedPaynymName) {
+            document.getElementById('nym-name').textContent = fetchedPaynymName;
           }
         }
       } catch (error) {
