@@ -146,6 +146,20 @@
       border: 2px solid #00ff41;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #qrCode img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+    }
+
+    .qr-tap-hint {
+      text-align: center;
+      color: #888;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
     }
     
     .uri-display {
@@ -425,8 +439,17 @@
             <div class="uri-label">Nonce:</div>
             <div class="uri-value">${data.nonce}</div>
           </div>
+          <div class="qr-tap-hint" style="display: block;">
+            👆 Tap QR code to open in wallet app
+          </div>
         `;
         qrDiv.style.display = 'block';
+
+        // Make QR code clickable to open auth47:// URI
+        const qrImg = qrDiv.querySelector('img');
+        qrImg.onclick = () => {
+          window.location.href = data.uri;
+        };
         
         status.className = 'status pending';
         status.innerHTML = '📱 Waiting for wallet to scan... <div class="spinner"></div>';

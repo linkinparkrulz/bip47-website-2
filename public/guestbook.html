@@ -179,6 +179,8 @@
             font-weight: bold;
             color: #00ff41;
             margin-bottom: 0.25rem;
+            word-break: break-word;
+            min-width: 0;
         }
 
         .timestamp {
@@ -262,6 +264,20 @@
             padding: 1rem;
             background: white;
             display: block;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .qr-code:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+
+        .qr-tap-hint {
+            text-align: center;
+            color: #888;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
         }
 
         .auth-status {
@@ -443,6 +459,9 @@
                     <div id="qr-loading" style="color: #888;">Generating QR code...</div>
                     <img id="qr-code" class="qr-code" style="display: none;" alt="Auth47 QR Code">
                 </div>
+                <div id="qr-tap-hint" class="qr-tap-hint" style="display: none;">
+                    👆 Tap QR code to open in wallet app
+                </div>
 
                 <div id="auth-status" class="auth-status pending">
                     Waiting for wallet signature...
@@ -539,6 +558,7 @@
             document.getElementById('auth-step-2').style.display = 'none';
             document.getElementById('qr-loading').style.display = 'block';
             document.getElementById('qr-code').style.display = 'none';
+            document.getElementById('qr-tap-hint').style.display = 'none';
             document.getElementById('auth-status').className = 'auth-status pending';
             document.getElementById('auth-status').textContent = 'Waiting for wallet signature...';
 
@@ -550,9 +570,15 @@
                 currentNonce = data.nonce;
                 console.log(`✅ Generated nonce: ${currentNonce}`);
 
-                document.getElementById('qr-code').src = data.qr;
-                document.getElementById('qr-code').style.display = 'block';
+                const qrCode = document.getElementById('qr-code');
+                qrCode.src = data.qr;
+                qrCode.style.display = 'block';
+                qrCode.onclick = () => {
+                    // Open auth47:// URI directly on mobile
+                    window.location.href = data.uri;
+                };
                 document.getElementById('qr-loading').style.display = 'none';
+                document.getElementById('qr-tap-hint').style.display = 'block';
 
                 // Start polling for auth status
                 startPolling(data.nonce);
