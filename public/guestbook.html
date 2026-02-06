@@ -249,7 +249,10 @@
 
         .qr-container {
             text-align: center;
-            margin: 1.5rem 0;
+            margin: 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .qr-code {
@@ -258,6 +261,7 @@
             border-radius: 4px;
             padding: 1rem;
             background: white;
+            display: block;
         }
 
         .auth-status {
@@ -576,9 +580,14 @@
                         
                         // Show step 2
                         setTimeout(() => {
-                            document.getElementById('auth-step-1').style.display = 'none';
-                            document.getElementById('auth-step-2').style.display = 'block';
-                            document.getElementById('verified-nym').textContent = data.nym;
+                        document.getElementById('auth-step-1').style.display = 'none';
+                        document.getElementById('auth-step-2').style.display = 'block';
+                        
+                        // Show nymName instead of full payment code
+                        const displayNym = data.nym.length > 30 
+                            ? data.nym.substring(0, 30) + '...'
+                            : data.nym;
+                        document.getElementById('verified-nym').textContent = displayNym;
                             
                             // Setup character counter
                             const textarea = document.getElementById('message-text');

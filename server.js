@@ -121,7 +121,9 @@ app.get('/check-auth/:nonce', (req, res) => {
     return res.json({ 
       status: 'verified',
       nym: auth.nym,
-      paymentCode: auth.paymentCode
+      paymentCode: auth.paymentCode,
+      challenge: auth.challenge,
+      signature: auth.signature
     });
   }
   
@@ -214,10 +216,12 @@ app.post('/verify', async (req, res) => {
     const verifiedProof = verifier.verifyProof(req.body, 'bitcoin');
     
     if (verifiedProof.result === 'ok') {
-      // Mark as verified
+      // Mark as verified and store auth data
       auth.verified = true;
       auth.nym = nym;
       auth.paymentCode = nym;
+      auth.challenge = challenge;
+      auth.signature = signature;
       
       console.log(`🎉 Authentication successful for ${nym}`);
       
