@@ -317,10 +317,12 @@ app.post('/callback', async (req, res) => {
       const verifiedProof = verifier.verifyProof(req.body, 'bitcoin');
       
       if (verifiedProof.result === 'ok') {
-        // Mark as verified
+        // Mark as verified and store auth data
         auth.verified = true;
         auth.nym = nym;
         auth.paymentCode = nym;
+        auth.challenge = challenge;
+        auth.signature = signature;
         
         console.log(`🎉 Authentication successful via callback for ${nym}`);
         
