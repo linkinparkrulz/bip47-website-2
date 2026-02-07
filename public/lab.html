@@ -8,216 +8,216 @@
 </head>
 <body>
     <div class="container">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-title">BIP47_LAB_V2.0.0</div>
+        <a href="/" class="back-button">Return to Terminal</a>
+        
+        <div class="header">
+            <h1>BIP47 LAB</h1>
+            <div class="header-nav">
+                <div class="status-led"></div>
+                <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">SYSTEM: ●</span>
+            </div>
+        </div>
+        
+        <p class="subtitle">Payment code validation and interactive BIP47 payment flow demonstration</p>
+
+        <!-- Interactive Scenario Panel -->
+        <div class="scenario-panel">
+            <div style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                <span style="font-size: 1.5rem;">🎭</span>
+                <h2 style="margin: 0;">Interactive Scenario: Alice Pays Bob</h2>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">
+                Walk through a complete BIP47 payment flow. See how payment codes enable private, reusable payments without address reuse.
+            </p>
+
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step active" data-step="1">1</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">2</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">3</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">4</div>
+            </div>
+            <div style="text-align: center; margin-bottom: var(--space-lg); font-size: 0.8rem; color: var(--text-muted);">
+                Exchange → Encrypt → Sign → Transaction
             </div>
 
-            <div class="terminal-content">
-                <div class="nav">
-                    <a href="/">← Back to Terminal</a>
-                </div>
-
-                <h1>> BIP47_LAB.EXE</h1>
-                <div class="subtitle">Payment code validation and interactive BIP47 payment flow demonstration</div>
-
-                <!-- Interactive Scenario Panel -->
-                <div class="tool-panel scenario-panel" style="margin-top: 1.5rem;">
-                    <div class="tool-header">
-                        <span class="tool-icon">🎭</span>
-                        <span class="tool-title">Interactive Scenario: Alice Pays Bob</span>
+            <!-- Step 1: Setup -->
+            <div class="scenario-step" id="step-1" data-step="1">
+                <h3>Exchange Payment Codes</h3>
+                <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">
+                    Alice gets Bob's payment code from his donation page. This contains Bob's xpub at path <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">m/47'</code>.
+                </p>
+                
+                <div class="player-tokens">
+                    <div class="player-token">
+                        <div class="player-avatar">👤</div>
+                        <div class="player-name">Alice</div>
+                        <div class="player-role">Sender</div>
                     </div>
-                    <div class="scenario-intro" style="margin-bottom: 1rem; color: #888; font-size: 0.9rem;">
-                        Walk through a complete BIP47 payment flow. See how payment codes enable private, reusable payments without address reuse.
-                    </div>
-
-                    <div class="scenario-steps">
-                        <!-- Step 1: Setup -->
-                        <div class="scenario-step" id="step-1" data-step="1">
-                            <div class="step-header">
-                                <span class="step-number">01</span>
-                                <span class="step-title">Exchange Payment Codes</span>
-                            </div>
-                            <div class="step-content">
-                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
-                                    Alice gets Bob's payment code from his donation page. This contains Bob's xpub at path <code>m/47'</code>.
-                                </p>
-                                <div class="code-visualization">
-                                    <div class="party-label" style="color: #ff66b2;">Alice (Sender)</div>
-                                    <div class="arrow">→ requests payment code from →</div>
-                                    <div class="party-label" style="color: #66b2ff;">Bob (Receiver)</div>
-                                </div>
-                                <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Bob's Payment Code (from donation page)</label>
-                                    <input type="text" id="scenario-bob-pc"
-                                           value="PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5mxDex7R8ttgtL1tGAt2TshZAoFeB5zn4c9nRo4oZpmuyuo4FTpUrd"
-                                           readonly style="font-size: 0.75rem;">
-                                </div>
-                                <button onclick="nextStep(2)">Initialize Payment Channel →</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Notification Transaction -->
-                        <div class="scenario-step hidden" id="step-2" data-step="2">
-                            <div class="step-header">
-                                <span class="step-number">02</span>
-                                <span class="step-title">Create Notification Transaction</span>
-                            </div>
-                            <div class="step-content">
-                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
-                                    Alice creates a shared secret using ECDH: <code>S = k × B</code>, where <code>k</code> is her UTXO private key and <code>B</code> is Bob's notification public key.
-                                </p>
-
-                                <div class="math-visualization" style="background: rgba(0,255,65,0.05); padding: 1rem; border-radius: 4px; margin: 1rem 0; font-family: monospace; font-size: 0.8rem;">
-                                    <div style="margin-bottom: 0.5rem;">
-                                        <span style="color: #ff66b2;">Alice's UTXO key (k)</span> ×
-                                        <span style="color: #66b2ff;">Bob's notif key (B)</span> =
-                                        <span style="color: #ffff66;">Shared Secret (S)</span>
-                                    </div>
-                                    <div id="shared-secret-display" style="color: #ffff66; word-break: break-all;">
-                                        Calculating...
-                                    </div>
-                                </div>
-
-                                <div class="highlight-box" style="margin: 1rem 0; font-size: 0.8rem;">
-                                    <strong>Why this matters:</strong> Using ECDH, Alice and Bob can share a secret without transmitting an encryption key. Only Bob can decrypt Alice's payment code because only he holds private key <code>b</code>.
-                                </div>
-
-                                <div class="tx-output-preview" style="margin: 1rem 0;">
-                                    <div class="output-label">Transaction Structure</div>
-                                    <div class="tx-outputs" style="font-size: 0.8rem;">
-                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(255,200,0,0.1); border-left: 3px solid #ffaa00; margin-bottom: 0.5rem;">
-                                            <strong>OP_RETURN</strong> (80 bytes encrypted payload)<br>
-                                            <span style="color: #888; font-size: 0.75rem;">Contains Alice's encrypted payment code</span>
-                                        </div>
-                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(102,178,255,0.1); border-left: 3px solid #66b2ff; margin-bottom: 0.5rem;">
-                                            <strong>Output 1</strong> → Bob's notification address (546 sats)<br>
-                                            <span style="color: #888; font-size: 0.75rem;">Alerts Bob that someone opened a channel</span>
-                                        </div>
-                                        <div class="tx-out" style="padding: 0.5rem; background: rgba(255,102,178,0.1); border-left: 3px solid #ff66b2;">
-                                            <strong>Output 2</strong> → Alice's change address<br>
-                                            <span style="color: #888; font-size: 0.75rem;">Remaining balance minus fees</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button onclick="nextStep(3)">Broadcast Notification TX →</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 3: Derive Payment Addresses -->
-                        <div class="scenario-step hidden" id="step-3" data-step="3">
-                            <div class="step-header">
-                                <span class="step-number">03</span>
-                                <span class="step-title">Derive Payment Addresses</span>
-                            </div>
-                            <div class="step-content">
-                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
-                                    After the notification transaction confirms, Alice can generate unique payment addresses for Bob using the formula: <code>K = B + sG</code>
-                                </p>
-
-                                <div class="derivation-visualization" style="margin: 1rem 0;">
-                                    <div class="formula" style="font-family: monospace; background: #001100; padding: 1rem; border: 1px solid #00ff41; border-radius: 4px; font-size: 0.8rem; margin-bottom: 1rem;">
-                                        <div style="color: #888;">// For each payment i:</div>
-                                        <div>B = Bob's xpub at index i</div>
-                                        <div>S = a × B</div>
-                                        <div>s = SHA256(S<sub>x</sub>)</div>
-                                        <div>sG = s × G</div>
-                                        <div style="color: #00ff41;">K = B + sG ← Payment address public key</div>
-                                    </div>
-
-                                    <div class="address-list" id="derived-addresses" style="margin: 1rem 0;">
-                                        <div class="output-label">Derived Payment Addresses</div>
-                                    </div>
-                                </div>
-
-                                <div class="warning-box" style="margin: 1rem 0; font-size: 0.8rem;">
-                                    <strong>Important:</strong> Some indices produce invalid points outside the curve. These are skipped automatically. Notice address indices may not be sequential (0, 1, 2, 5, 6...).
-                                </div>
-
-                                <button onclick="nextStep(4)">Make Payment →</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 4: Bob Receives -->
-                        <div class="scenario-step hidden" id="step-4" data-step="4">
-                            <div class="step-header">
-                                <span class="step-number">04</span>
-                                <span class="step-title">Bob Receives & Spends</span>
-                            </div>
-                            <div class="step-content">
-                                <p style="margin-bottom: 1rem; font-size: 0.85rem;">
-                                    Bob monitors his notification address and sees Alice's transaction. He derives the same addresses using: <code>k = b + s</code>
-                                </p>
-
-                                <div class="private-key-derivation" style="background: rgba(255,68,68,0.05); border: 1px solid #ff4444; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
-                                    <div class="output-label" style="color: #ff4444;">Private Key Derivation (Bob only)</div>
-                                    <div style="font-family: monospace; font-size: 0.8rem; margin-top: 0.5rem;">
-                                        <div style="color: #888;">// Bob calculates:</div>
-                                        <div>b = Bob's private key at index i</div>
-                                        <div>S = b × A</div>
-                                        <div>s = SHA256(S<sub>x</sub>)</div>
-                                        <div style="color: #ff4444;">k = b + s ← Private key to spend</div>
-                                    </div>
-                                </div>
-
-                                <div class="highlight-box" style="margin: 1rem 0; font-size: 0.8rem;">
-                                    <strong>Key Insight:</strong> Alice can generate addresses and send payments, but <em>only Bob can spend them</em> because only he knows private key <code>b</code>. This is the magic of BIP47—one-way address derivation.
-                                </div>
-
-                                <div class="summary-stats" id="receiving-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">1</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Notification TX</div>
-                                    </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">∞</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Payment Addresses</div>
-                                    </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(255,100,100,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #ff6666;">0</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Address Reuse</div>
-                                    </div>
-                                </div>
-
-                                <button onclick="resetScenario()">↻ Run Scenario Again</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="scenario-progress" style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: center;">
-                        <div class="progress-dot active" data-step="1"></div>
-                        <div class="progress-dot" data-step="2"></div>
-                        <div class="progress-dot" data-step="3"></div>
-                        <div class="progress-dot" data-step="4"></div>
+                    <div class="player-token">
+                        <div class="player-avatar">👤</div>
+                        <div class="player-name">Bob</div>
+                        <div class="player-role">Receiver</div>
                     </div>
                 </div>
 
-                <div class="tool-grid" style="margin-top: 1.5rem;">
-                    <!-- Validator Tool -->
-                    <div class="tool-panel">
-                        <div class="tool-header">
-                            <span class="tool-icon">✓</span>
-                            <span class="tool-title">Payment Code Validator</span>
-                        </div>
-                        <div class="input-group">
-                            <label>Payment Code to Validate</label>
-                            <input type="text" id="validate-input" placeholder="PM8TJKRY...">
-                        </div>
-                        <button id="validate-btn" onclick="validatePaymentCode()">
-                            VALIDATE CODE
-                        </button>
-                        <div id="validate-output" class="output hidden">
-                            <div class="validation-grid" id="validate-result"></div>
-                        </div>
-                        <div id="validate-error" class="error-message hidden"></div>
-                    </div>
+                <div class="validator-panel" style="margin-bottom: var(--space-lg);">
+                    <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.9rem; font-weight: 500;">Bob's Payment Code</label>
+                    <input type="text" id="scenario-bob-pc"
+                           value="PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5mxDex7R8ttgtL1tGAt2TshZAoFeB5zn4c9nRo4oZpmuyuo4FTpUrd"
+                           readonly style="font-size: 0.75rem;">
                 </div>
 
-                <div class="footer">
-                    <div class="footer-text">Payment codes are reusable and privacy-preserving</div>
-                </div>
+                <button class="primary btn-large" onclick="nextStep(2)" style="width: 100%;">
+                    Initialize Payment Channel
+                </button>
             </div>
+
+            <!-- Step 2: Notification Transaction -->
+            <div class="scenario-step hidden" id="step-2" data-step="2">
+                <h3>Create Notification Transaction</h3>
+                <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">
+                    Alice creates a shared secret using ECDH: <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">S = k × B</code>, where <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">k</code> is her UTXO private key and <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">B</code> is Bob's notification public key.
+                </p>
+
+                <div class="validator-panel" style="margin-bottom: var(--space-lg); background: rgba(167, 196, 212, 0.1);">
+                    <div style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: var(--space-sm);">
+                        <span style="color: var(--mauve);">Alice's UTXO key (k)</span> ×
+                        <span style="color: var(--blue);">Bob's notif key (B)</span> =
+                        <span style="color: var(--sage-dark);">Shared Secret (S)</span>
+                    </div>
+                    <div id="shared-secret-display" class="code-text" style="color: var(--sage-dark); word-break: break-all;">
+                        Calculating...
+                    </div>
+                </div>
+
+                <div class="tool-panel" style="margin-bottom: var(--space-lg); background: rgba(167, 196, 212, 0.05);">
+                    <strong style="color: var(--blue);">Why this matters:</strong> Using ECDH, Alice and Bob can share a secret without transmitting an encryption key. Only Bob can decrypt Alice's payment code because only he holds private key <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">b</code>.
+                </div>
+
+                <div style="margin-bottom: var(--space-lg);">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-sm);">Transaction Structure</div>
+                    <div style="font-size: 0.8rem;">
+                        <div style="padding: var(--space-sm); background: rgba(212, 196, 167, 0.2); border-left: 3px solid var(--amber); margin-bottom: var(--space-sm); border-radius: var(--radius-sm);">
+                            <strong>OP_RETURN</strong> (80 bytes encrypted payload)<br>
+                            <span style="color: var(--text-muted); font-size: 0.75rem;">Contains Alice's encrypted payment code</span>
+                        </div>
+                        <div style="padding: var(--space-sm); background: rgba(167, 196, 212, 0.2); border-left: 3px solid var(--blue); margin-bottom: var(--space-sm); border-radius: var(--radius-sm);">
+                            <strong>Output 1</strong> → Bob's notification address (546 sats)<br>
+                            <span style="color: var(--text-muted); font-size: 0.75rem;">Alerts Bob that someone opened a channel</span>
+                        </div>
+                        <div style="padding: var(--space-sm); background: rgba(212, 167, 196, 0.2); border-left: 3px solid var(--mauve); border-radius: var(--radius-sm);">
+                            <strong>Output 2</strong> → Alice's change address<br>
+                            <span style="color: var(--text-muted); font-size: 0.75rem;">Remaining balance minus fees</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="primary btn-large" onclick="nextStep(3)" style="width: 100%;">
+                    Broadcast Notification TX
+                </button>
+            </div>
+
+            <!-- Step 3: Derive Payment Addresses -->
+            <div class="scenario-step hidden" id="step-3" data-step="3">
+                <h3>Derive Payment Addresses</h3>
+                <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">
+                    After the notification transaction confirms, Alice can generate unique payment addresses for Bob using formula: <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">K = B + sG</code>
+                </p>
+
+                <div class="validator-panel" style="margin-bottom: var(--space-lg);">
+                    <div style="font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8;">
+                        <div style="color: var(--text-muted);">// For each payment i:</div>
+                        <div>B = Bob's xpub at index i</div>
+                        <div>S = a × B</div>
+                        <div>s = SHA256(S<sub>x</sub>)</div>
+                        <div>sG = s × G</div>
+                        <div style="color: var(--sage-dark);">K = B + sG ← Payment address public key</div>
+                    </div>
+                </div>
+
+                <div id="derived-addresses" style="margin-bottom: var(--space-lg);">
+                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-sm);">Derived Payment Addresses</div>
+                </div>
+
+                <div class="tool-panel" style="margin-bottom: var(--space-lg); background: rgba(212, 196, 167, 0.1);">
+                    <strong style="color: var(--amber-dark);">Important:</strong> Some indices produce invalid points outside the curve. These are skipped automatically. Notice address indices may not be sequential (0, 1, 2, 5, 6...).
+                </div>
+
+                <button class="primary btn-large" onclick="nextStep(4)" style="width: 100%;">
+                    Make Payment
+                </button>
+            </div>
+
+            <!-- Step 4: Bob Receives -->
+            <div class="scenario-step hidden" id="step-4" data-step="4">
+                <h3>Bob Receives & Spends</h3>
+                <p style="color: var(--text-muted); margin-bottom: var(--space-lg);">
+                    Bob monitors his notification address and sees Alice's transaction. He derives the same addresses using: <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">k = b + s</code>
+                </p>
+
+                <div class="validator-panel" style="margin-bottom: var(--space-lg); background: rgba(212, 167, 196, 0.1);">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--mauve-dark); margin-bottom: var(--space-sm);">Private Key Derivation (Bob only)</div>
+                    <div style="font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8;">
+                        <div style="color: var(--text-muted);">// Bob calculates:</div>
+                        <div>b = Bob's private key at index i</div>
+                        <div>S = b × A</div>
+                        <div>s = SHA256(S<sub>x</sub>)</div>
+                        <div style="color: var(--mauve-dark);">k = b + s ← Private key to spend</div>
+                    </div>
+                </div>
+
+                <div class="tool-panel" style="margin-bottom: var(--space-lg); background: rgba(167, 196, 212, 0.1);">
+                    <strong style="color: var(--blue);">Key Insight:</strong> Alice can generate addresses and send payments, but <em>only Bob can spend them</em> because only he knows private key <code style="background: var(--surface-inset); padding: 0.2rem 0.4rem; border-radius: var(--radius-sm);">b</code>. This is the magic of BIP47—one-way address derivation.
+                </div>
+
+                <div class="stats-grid" style="margin-bottom: var(--space-lg);">
+                    <div class="stat-box">
+                        <div class="stat-value">1</div>
+                        <div class="stat-label">Notification TX</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">∞</div>
+                        <div class="stat-label">Payment Addresses</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Address Reuse</div>
+                    </div>
+                </div>
+
+                <button class="secondary btn-large" onclick="resetScenario()" style="width: 100%;">
+                    ↻ Run Scenario Again
+                </button>
+            </div>
+        </div>
+
+        <!-- Validator Tool -->
+        <div class="tool-panel">
+            <div style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md);">
+                <span style="font-size: 1.5rem;">✓</span>
+                <h2 style="margin: 0;">Payment Code Validator</h2>
+            </div>
+            
+            <div class="validator-panel">
+                <label style="display: block; margin-bottom: var(--space-sm); font-size: 0.9rem; font-weight: 500;">Payment Code to Validate</label>
+                <input type="text" id="validate-input" placeholder="PM8TJKRY..." style="margin-bottom: var(--space-md);">
+                <button id="validate-btn" onclick="validatePaymentCode()" class="primary" style="width: 100%;">
+                    Validate Code
+                </button>
+            </div>
+            
+            <div id="validate-output" class="hidden" style="margin-top: var(--space-lg);">
+                <div id="validate-result"></div>
+            </div>
+            <div id="validate-error" class="hidden" style="margin-top: var(--space-md);"></div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-text">Payment codes are reusable and privacy-preserving</div>
         </div>
     </div>
 
@@ -229,7 +229,7 @@
             const btn = document.getElementById(btnId);
             if (loading) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="loading"></span>PROCESSING...';
+                btn.innerHTML = '<span class="loading-spinner"></span> Processing...';
             } else {
                 btn.disabled = false;
                 btn.innerHTML = btn.getAttribute('data-original-text') || btn.innerText;
@@ -273,7 +273,9 @@
 
             if (!paymentCode) {
                 show('validate-error');
-                document.getElementById('validate-error').textContent = '❌ Payment code required';
+                document.getElementById('validate-error').innerHTML = `
+                    <div class="validation-result invalid">Payment code required</div>
+                `;
                 return;
             }
 
@@ -283,19 +285,19 @@
                 console.log('🔍 Validating payment code...');
                 const data = await apiPost('/api/bip47/validate', { paymentCode });
 
-                const grid = document.getElementById('validate-result');
-                grid.innerHTML = Object.entries(data.checks).map(([check, valid]) => `
-                    <div class="validation-item ${valid ? 'valid' : 'invalid'}">
-                        <span class="status-icon">${valid ? '✓' : '✗'}</span>
-                        <span>${check}: ${valid ? 'PASS' : 'FAIL'}</span>
+                const result = document.getElementById('validate-result');
+                result.innerHTML = Object.entries(data.checks).map(([check, valid]) => `
+                    <div style="display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm); background: ${valid ? 'rgba(196, 212, 167, 0.2)' : 'rgba(212, 167, 196, 0.2)'}; border-radius: var(--radius-sm); margin-bottom: var(--space-xs);">
+                        <span style="color: ${valid ? 'var(--sage-dark)' : 'var(--mauve-dark)'}; font-weight: 600;">${valid ? '✓' : '✗'}</span>
+                        <span style="font-size: 0.9rem;">${check}: ${valid ? 'PASS' : 'FAIL'}</span>
                     </div>
                 `).join('');
 
                 if (data.valid) {
-                    grid.innerHTML += `
-                        <div class="validation-item valid" style="grid-column: 1 / -1; margin-top: 0.5rem;">
-                            <span class="status-icon">✓</span>
-                            <span>Valid BIP47 Payment Code v1</span>
+                    result.innerHTML += `
+                        <div style="display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm); background: rgba(196, 212, 167, 0.3); border-radius: var(--radius-sm); margin-top: var(--space-sm);">
+                            <span style="color: var(--sage-dark); font-weight: 600;">✓</span>
+                            <span style="font-size: 0.9rem;">Valid BIP47 Payment Code v1</span>
                         </div>
                     `;
                 }
@@ -304,7 +306,9 @@
                 console.log(`✅ Validation complete: ${data.valid ? 'VALID' : 'INVALID'}`);
             } catch (error) {
                 console.error('💥 Validation error:', error);
-                document.getElementById('validate-error').textContent = `❌ ${error.message}`;
+                document.getElementById('validate-error').innerHTML = `
+                    <div class="validation-result invalid">${error.message}</div>
+                `;
                 show('validate-error');
             } finally {
                 setLoading('validate-btn', false);
@@ -327,23 +331,29 @@
 
         // Scenario navigation
         function nextStep(step) {
-            // Hide current
+            // Hide all steps
             document.querySelectorAll('.scenario-step').forEach(el => el.classList.add('hidden'));
-            // Show new
+            // Show new step
             document.getElementById(`step-${step}`).classList.remove('hidden');
 
-            // Update progress dots
-            document.querySelectorAll('.progress-dot').forEach((dot, idx) => {
-                dot.classList.remove('active');
-                if (idx + 1 < step) dot.classList.add('completed');
-                if (idx + 1 === step) dot.classList.add('active');
+            // Update progress indicator
+            document.querySelectorAll('.progress-step').forEach((stepEl, idx) => {
+                stepEl.classList.remove('active', 'completed');
+                if (idx + 1 < step) stepEl.classList.add('completed');
+                if (idx + 1 === step) stepEl.classList.add('active');
+            });
+
+            // Update progress lines
+            document.querySelectorAll('.progress-line').forEach((line, idx) => {
+                line.classList.remove('completed');
+                if (idx + 1 < step) line.classList.add('completed');
             });
 
             // Generate sample data for step 2
             if (step === 2) {
                 setTimeout(() => {
                     document.getElementById('shared-secret-display').textContent =
-                        '03' + Array(64).fill(0).map(() => Math.floor(Math.random()*16).toString(16)).join('');
+                        '03' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
                 }, 800);
             }
 
@@ -357,7 +367,7 @@
 
         function generateSampleAddresses() {
             const list = document.getElementById('derived-addresses');
-            list.innerHTML = '<div class="output-label">Derived Payment Addresses</div>';
+            list.innerHTML = '<div style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-sm);">Derived Payment Addresses</div>';
 
             const addresses = [
                 { idx: 0, addr: 'tb1q8gpft5rpju8lcshfa6at44pev5y0q7kzfwqpg' },
@@ -370,10 +380,10 @@
             addresses.forEach((a, i) => {
                 setTimeout(() => {
                     const div = document.createElement('div');
-                    div.style.cssText = 'padding: 0.5rem; background: rgba(0,255,65,0.05); margin: 0.25rem 0; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; animation: slideIn 0.3s ease;';
+                    div.style.cssText = 'padding: var(--space-sm); background: rgba(196, 212, 167, 0.2); margin: var(--space-xs) 0; border-radius: var(--radius-sm); font-size: 0.8rem; display: flex; justify-content: space-between; animation: fadeIn 0.3s ease;';
                     div.innerHTML = `
-                        <span style="color: #888;">#${a.idx}</span>
-                        <span style="color: #00ff41; font-family: monospace;">${a.addr}</span>
+                        <span style="color: var(--text-muted);">#${a.idx}</span>
+                        <span class="code-text" style="color: var(--sage-dark);">${a.addr}</span>
                     `;
                     list.appendChild(div);
                 }, i * 200);
@@ -383,10 +393,16 @@
         function resetScenario() {
             document.querySelectorAll('.scenario-step').forEach(el => el.classList.add('hidden'));
             document.getElementById('step-1').classList.remove('hidden');
-            document.querySelectorAll('.progress-dot').forEach(dot => {
-                dot.classList.remove('active', 'completed');
+            
+            document.querySelectorAll('.progress-step').forEach((stepEl, idx) => {
+                stepEl.classList.remove('active', 'completed');
+                if (idx === 0) stepEl.classList.add('active');
             });
-            document.querySelector('.progress-dot[data-step="1"]').classList.add('active');
+            
+            document.querySelectorAll('.progress-line').forEach(line => {
+                line.classList.remove('completed');
+            });
+            
             console.log('✅ Scenario reset to step 1');
         }
     </script>

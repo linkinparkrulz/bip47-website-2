@@ -5,12 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Auth Callback</title>
   <style>
+    :root {
+      --bg: #f5f3ef;
+      --surface: #e8e4dc;
+      --surface-inset: #d9d4c9;
+      --text: #2c2c2c;
+      --text-muted: #6b6b6b;
+      --sage: #c4d4a7;
+      --sage-dark: #8a9a6d;
+      --blue: #a7c4d4;
+      --mauve: #d4c4bc;
+      --mauve-dark: #a89890;
+      --amber: #d4c4a7;
+      --amber-dark: #a89887;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 4px rgba(44, 44, 44, 0.08);
+      --shadow-md: 0 4px 12px rgba(44, 44, 44, 0.12);
+      --shadow-lg: 0 8px 24px rgba(44, 44, 44, 0.15);
+    }
+    
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
-      font-family: 'Courier New', monospace;
-      background: #0a0e27;
-      color: #00ff41;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       padding: 2rem;
       min-height: 100vh;
       display: flex;
@@ -21,6 +42,11 @@
     .container {
       max-width: 700px;
       text-align: center;
+      background: var(--surface);
+      padding: var(--radius-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--surface-inset);
     }
     
     h1 {
@@ -39,11 +65,11 @@
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      border: 3px solid #00ff41;
+      border: 3px solid var(--sage);
       margin: 1.5rem auto;
       display: none;
       object-fit: cover;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+      box-shadow: var(--shadow-md);
     }
     
     .avatar.show {
@@ -54,39 +80,40 @@
       font-size: 1.1rem;
       line-height: 1.6;
       margin: 0.8rem 0;
-      color: #00ff41;
+      color: var(--text);
     }
     
-    .success { color: #00ff41; font-weight: bold; }
+    .success { color: var(--sage-dark); font-weight: 600; }
     .nym-name { 
-      color: #00ff41; 
+      color: var(--text); 
       font-size: 1.4rem; 
       margin: 1rem 0;
+      font-weight: 600;
     }
     .payment-code { 
-      color: #888; 
-      font-size: 0.9rem; 
+      color: var(--text-muted); 
+      font-size: 0.85rem; 
       word-break: break-all;
       font-family: 'Courier New', monospace;
       margin: 0.5rem 0;
-      background: rgba(0, 255, 65, 0.1);
+      background: var(--bg);
       padding: 0.8rem;
-      border-radius: 4px;
-      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-inset);
     }
     .countdown { 
-      color: #00ff41; 
-      font-size: 1.3rem;
-      font-weight: bold;
+      color: var(--text); 
+      font-size: 1.1rem;
+      font-weight: 500;
       margin: 1.5rem 0;
     }
     
     .spinner {
       display: inline-block;
-      width: 30px;
-      height: 30px;
-      border: 4px solid rgba(0, 255, 65, 0.3);
-      border-top-color: #00ff41;
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--surface-inset);
+      border-top-color: var(--sage);
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 1.5rem auto;
@@ -97,25 +124,29 @@
     }
     
     .return-btn {
-      background: #00ff41;
-      color: #0a0e27;
+      background: var(--sage);
+      color: var(--text);
       border: none;
       padding: 1rem 2rem;
-      font-family: 'Courier New', monospace;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 1rem;
       cursor: pointer;
       margin-top: 1.5rem;
-      font-weight: bold;
+      font-weight: 600;
       text-decoration: none;
       display: inline-block;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
     }
     
     .return-btn:hover {
-      background: #00cc33;
-      box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+      background: var(--sage-dark);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
     }
     
-    .error { color: #ff4444; }
+    .error { color: var(--mauve-dark); }
     .hidden { display: none; }
   </style>
 </head>
@@ -137,7 +168,7 @@
     
     <div id="error-content" class="hidden">
       <p class="error">❌ Authentication Failed</p>
-      <p>Invalid signature or expired challenge</p>
+      <p style="color: var(--text-muted);">Invalid signature or expired challenge</p>
       <a href="/auth" class="return-btn">Return to Auth Page</a>
     </div>
   </div>

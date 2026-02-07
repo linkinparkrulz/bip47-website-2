@@ -8,36 +8,31 @@
 </head>
 <body>
     <div class="container">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-title">GUESTBOOK_V1.0.0</div>
+        <a href="/" class="back-button">Back to Terminal</a>
+        
+        <div class="header">
+            <h1>GUESTBOOK</h1>
+            <div class="header-nav">
+                <div class="status-led"></div>
+                <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">SYSTEM: ●</span>
             </div>
+        </div>
+        
+        <p class="subtitle">Cryptographically verified messages from the BIP47 community</p>
 
-            <div class="terminal-content">
-                <div class="nav">
-                    <a href="/">← Back to Terminal</a>
-                </div>
+        <button id="sign-btn" class="primary btn-large" onclick="openAuthModal()" style="width: 100%; margin-bottom: var(--space-xl);">
+            ✍️ Sign Guestbook
+        </button>
 
-                <h1>> GUESTBOOK.EXE</h1>
-                <div class="subtitle">Cryptographically verified messages from the BIP47 community</div>
-
-                <div class="sign-section">
-                    <button id="sign-btn" class="sign-btn" onclick="openAuthModal()">
-                        ✍️ SIGN GUESTBOOK
-                    </button>
-                </div>
-
-                <div id="messages-container" class="messages-list">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📝</div>
-                        <div>Loading messages...</div>
-                    </div>
-                </div>
-
-                <div class="footer">
-                    <div class="footer-text">All messages are cryptographically signed with BIP47 payment codes</div>
-                </div>
+        <div id="messages-container" class="messages-list">
+            <div class="empty-state" style="text-align: center; padding: var(--space-2xl);">
+                <div style="font-size: 3rem; margin-bottom: var(--space-md);">📝</div>
+                <div style="color: var(--text-muted);">Loading messages...</div>
             </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-text">All messages are cryptographically signed with BIP47 payment codes</div>
         </div>
     </div>
 
@@ -50,44 +45,42 @@
             </div>
 
             <div id="auth-step-1">
-                <p style="margin-bottom: 1rem; color: #888; font-size: 0.9rem;">
+                <p style="margin-bottom: var(--space-lg); color: var(--text-muted); font-size: 0.9rem;">
                     Scan this QR code with your BIP47 wallet (Samourai Wallet, Sparrow Wallet, etc.) to sign the guestbook.
                 </p>
 
                 <div class="qr-container">
-                    <div id="qr-loading" style="color: #888;">Generating QR code...</div>
-                    <img id="qr-code" class="qr-code" style="display: none;" alt="Auth47 QR Code">
+                    <div id="qr-loading" style="color: var(--text-muted);">Generating QR code...</div>
+                    <img id="qr-code" class="qr-code hidden" alt="Auth47 QR Code">
                 </div>
-                <div id="qr-tap-hint" class="qr-tap-hint" style="display: none;">
+                <div id="qr-tap-hint" class="hidden" style="display: block; margin-top: var(--space-md); text-align: center; color: var(--text-muted); font-size: 0.8rem;">
                     👆 Tap QR code to open in wallet app
                 </div>
 
-                <div id="auth-status" class="auth-status pending">
+                <div id="auth-status" class="status-message pending">
                     Waiting for wallet signature...
                 </div>
             </div>
 
-            <div id="auth-step-2" style="display: none;">
-                <p style="margin-bottom: 1rem; color: #00ff41; font-size: 0.9rem;">
+            <div id="auth-step-2" class="hidden">
+                <p style="margin-bottom: var(--space-md); color: var(--sage-dark); font-size: 0.9rem;">
                     ✅ Authentication successful! You are now verified as:
                 </p>
-                <p style="margin-bottom: 1.5rem; font-weight: bold; color: #00ff41;" id="verified-nym"></p>
+                <p style="margin-bottom: var(--space-lg); font-weight: 600; color: var(--sage-dark);" id="verified-nym"></p>
 
-                <div class="message-input">
-                    <label style="display: block; font-size: 0.75rem; color: #888; margin-bottom: 0.5rem; text-transform: uppercase;">
-                        Your Message
-                    </label>
-                    <textarea id="message-text" placeholder="Write your message to the BIP47 community..." maxlength="500"></textarea>
-                    <div style="text-align: right; font-size: 0.75rem; color: #888; margin-top: 0.25rem;">
+                <div class="validator-panel">
+                    <label style="display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: var(--space-sm);">Your Message</label>
+                    <textarea id="message-text" placeholder="Write your message to the BIP47 community..." maxlength="500" style="min-height: 120px;"></textarea>
+                    <div style="text-align: right; font-size: 0.75rem; color: var(--text-muted); margin-top: var(--space-xs);">
                         <span id="char-count">0</span>/500 characters
                     </div>
                 </div>
 
-                <button id="submit-btn" class="submit-btn" onclick="submitMessage()">
-                    SUBMIT MESSAGE
+                <button id="submit-btn" class="primary btn-large" onclick="submitMessage()" style="width: 100%;">
+                    Submit Message
                 </button>
 
-                <div id="submit-error" class="error-message" style="display: none;"></div>
+                <div id="submit-error" class="status-message error hidden" style="margin-top: var(--space-md);"></div>
             </div>
         </div>
     </div>
@@ -113,9 +106,9 @@
 
                 if (messages.length === 0) {
                     container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
-                            <div>No messages yet. Be the first to sign!</div>
+                        <div class="empty-state" style="text-align: center; padding: var(--space-2xl);">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-md);">📝</div>
+                            <div style="color: var(--text-muted);">No messages yet. Be the first to sign!</div>
                         </div>
                     `;
                     return;
@@ -142,9 +135,9 @@
             } catch (error) {
                 console.error('💥 Error loading messages:', error);
                 document.getElementById('messages-container').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <div>Failed to load messages. Please try again.</div>
+                    <div class="empty-state" style="text-align: center; padding: var(--space-2xl);">
+                        <div style="font-size: 2rem; margin-bottom: var(--space-md);">❌</div>
+                        <div style="color: var(--mauve-dark);">Failed to load messages. Please try again.</div>
                     </div>
                 `;
             }
@@ -153,12 +146,12 @@
         // Open auth modal
         async function openAuthModal() {
             document.getElementById('auth-modal').classList.add('active');
-            document.getElementById('auth-step-1').style.display = 'block';
-            document.getElementById('auth-step-2').style.display = 'none';
+            document.getElementById('auth-step-1').classList.remove('hidden');
+            document.getElementById('auth-step-2').classList.add('hidden');
             document.getElementById('qr-loading').style.display = 'block';
-            document.getElementById('qr-code').style.display = 'none';
-            document.getElementById('qr-tap-hint').style.display = 'none';
-            document.getElementById('auth-status').className = 'auth-status pending';
+            document.getElementById('qr-code').classList.add('hidden');
+            document.getElementById('qr-tap-hint').classList.add('hidden');
+            document.getElementById('auth-status').className = 'status-message pending';
             document.getElementById('auth-status').textContent = 'Waiting for wallet signature...';
 
             try {
@@ -171,19 +164,19 @@
 
                 const qrCode = document.getElementById('qr-code');
                 qrCode.src = data.qr;
-                qrCode.style.display = 'block';
+                qrCode.classList.remove('hidden');
                 qrCode.onclick = () => {
                     // Open auth47:// URI directly on mobile
                     window.location.href = data.uri;
                 };
                 document.getElementById('qr-loading').style.display = 'none';
-                document.getElementById('qr-tap-hint').style.display = 'block';
+                document.getElementById('qr-tap-hint').classList.remove('hidden');
 
                 // Start polling for auth status
                 startPolling(data.nonce);
             } catch (error) {
                 console.error('💥 Error starting auth:', error);
-                document.getElementById('auth-status').className = 'auth-status error';
+                document.getElementById('auth-status').className = 'status-message error';
                 document.getElementById('auth-status').textContent = 'Failed to generate QR code';
             }
         }
@@ -200,19 +193,19 @@
                         currentAuth = data;
                         console.log(`✅ Auth verified for ${data.nym}`);
                         
-                        document.getElementById('auth-status').className = 'auth-status verified';
+                        document.getElementById('auth-status').className = 'status-message success';
                         document.getElementById('auth-status').textContent = '✅ Authentication successful!';
                         
                         // Show step 2
                         setTimeout(() => {
-                        document.getElementById('auth-step-1').style.display = 'none';
-                        document.getElementById('auth-step-2').style.display = 'block';
-                        
-                        // Show nymName instead of full payment code
-                        const displayNym = data.nym.length > 30 
-                            ? data.nym.substring(0, 30) + '...'
-                            : data.nym;
-                        document.getElementById('verified-nym').textContent = displayNym;
+                            document.getElementById('auth-step-1').classList.add('hidden');
+                            document.getElementById('auth-step-2').classList.remove('hidden');
+                            
+                            // Show nymName instead of full payment code
+                            const displayNym = data.nym.length > 30 
+                                ? data.nym.substring(0, 30) + '...'
+                                : data.nym;
+                            document.getElementById('verified-nym').textContent = displayNym;
                             
                             // Setup character counter
                             const textarea = document.getElementById('message-text');
@@ -222,7 +215,7 @@
                         }, 1000);
                     } else if (data.status === 'invalid') {
                         clearInterval(pollInterval);
-                        document.getElementById('auth-status').className = 'auth-status error';
+                        document.getElementById('auth-status').className = 'status-message error';
                         document.getElementById('auth-status').textContent = '❌ Authentication failed or expired';
                     }
                 } catch (error) {
@@ -258,7 +251,7 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span>SUBMITTING...';
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
 
             try {
                 console.log('📝 Submitting message...');
@@ -289,7 +282,7 @@
                 showError('Failed to submit message. Please try again.');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'SUBMIT MESSAGE';
+                submitBtn.innerHTML = 'Submit Message';
             }
         }
 
@@ -297,9 +290,9 @@
         function showError(message) {
             const errorDiv = document.getElementById('submit-error');
             errorDiv.textContent = `❌ ${message}`;
-            errorDiv.style.display = 'block';
+            errorDiv.classList.remove('hidden');
             setTimeout(() => {
-                errorDiv.style.display = 'none';
+                errorDiv.classList.add('hidden');
             }, 5000);
         }
 

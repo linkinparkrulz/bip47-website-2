@@ -8,50 +8,45 @@
 </head>
 <body>
   <div class="container">
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-title">PAYNYM_EXPLORER_V1.0.0</div>
-      </div>
-      
-      <div class="terminal-content">
-        <div class="nav">
-          <a href="/">← Back to Terminal</a>
-        </div>
-        
-        <div class="header">
-          <h1>> PAYNYM EXPLORER</h1>
-          <div class="subtitle">Search and explore Paynym identities</div>
-        </div>
-        
-        <div class="search-section">
-          <label class="search-label">Enter Payment Code, NymID, or NymName:</label>
-          <div class="search-container">
-            <input 
-              type="text" 
-              class="search-input" 
-              id="searchInput"
-              placeholder="PM8T... or nymName or nymID"
-              onkeypress="if(event.key==='Enter') searchPaynym()"
-            >
-            <button class="search-btn" id="searchBtn" onclick="searchPaynym()">
-              SEARCH
-            </button>
-          </div>
-        </div>
-        
-        <div id="resultsContainer" class="results-section">
-          <!-- Results will be populated here -->
-        </div>
-        
-        <div id="emptyState" class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <p>Enter a payment code, nymID, or nymName to explore</p>
-        </div>
+    <a href="/" class="back-button">Back to Terminal</a>
+    
+    <div class="header">
+      <h1>PAYNYM EXPLORER</h1>
+      <div class="header-nav">
+        <div class="status-led"></div>
+        <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">SYSTEM: ●</span>
       </div>
     </div>
     
+    <p class="subtitle">Search and explore Paynym identities</p>
+    
+    <div class="search-section">
+      <label class="search-label" style="display: block; margin-bottom: var(--space-sm); font-size: 0.9rem; font-weight: 500; color: var(--text);">Enter Payment Code, NymID, or NymName:</label>
+      <div class="search-input-wrapper">
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder="PM8T... or nymName or nymID"
+          onkeypress="if(event.key==='Enter') searchPaynym()"
+        >
+        <span class="search-icon">🔍</span>
+      </div>
+      <button class="primary" style="width: 100%; margin-top: var(--space-md);" id="searchBtn" onclick="searchPaynym()">
+        Search Paynyms
+      </button>
+    </div>
+    
+    <div id="resultsContainer">
+      <!-- Results will be populated here -->
+    </div>
+    
+    <div id="emptyState" class="result-section" style="text-align: center; padding: var(--space-2xl);">
+      <div style="font-size: 3rem; margin-bottom: var(--space-md);">🔍</div>
+      <p style="color: var(--text-muted);">Enter a payment code, nymID, or nymName to explore</p>
+    </div>
+    
     <div class="footer">
-      <div class="footer-text">Data provided by <a href="https://paynym.rs" target="_blank">paynym.rs</a></div>
+      <div class="footer-text">Data provided by <a href="https://paynym.rs" target="_blank" style="color: var(--blue);">paynym.rs</a></div>
       <div class="footer-text">Privacy is a fundamental human right</div>
     </div>
   </div>
@@ -68,13 +63,15 @@
       
       // Show loading state
       btn.disabled = true;
-      btn.textContent = 'SEARCHING...';
+      btn.innerHTML = '<span class="loading-spinner"></span> Searching...';
       emptyState.style.display = 'none';
       resultsContainer.classList.add('visible');
       resultsContainer.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <div class="loading-text">Searching Paynym database...</div>
+        <div class="result-section" style="text-align: center; padding: var(--space-2xl);">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div style="color: var(--text-muted);">Searching Paynym database...</div>
+          </div>
         </div>
       `;
       
@@ -96,14 +93,14 @@
         displayResults(data);
       } catch (error) {
         resultsContainer.innerHTML = `
-          <div class="error">
-            <div class="error-icon">❌</div>
-            <div>${error.message}</div>
+          <div class="result-section" style="text-align: center; padding: var(--space-xl);">
+            <div style="font-size: 2rem; margin-bottom: var(--space-md);">❌</div>
+            <div style="color: var(--mauve-dark); font-weight: 500;">${error.message}</div>
           </div>
         `;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'SEARCH';
+        btn.innerHTML = 'Search Paynyms';
       }
     }
     
@@ -115,15 +112,16 @@
       
       // Build payment codes HTML
       const codesHtml = data.codes.map(code => `
-        <div class="code-item">
-          <div class="code-header">
-            <span class="code-label">Payment Code</span>
-            <span class="code-status ${code.claimed ? 'status-claimed' : 'status-unclaimed'}">
-              ${code.claimed ? 'CLAIMED' : 'UNCLAIMED'}
-            </span>
+        <div class="payment-code-item">
+          <div style="flex: 1;">
+            <div class="code-text" style="font-size: 0.85rem;">${code.code}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: var(--space-xs);">
+              ${code.segwit ? '⚡ Segwit enabled' : 'Legacy'}
+            </div>
           </div>
-          <div class="code-value">${code.code}</div>
-          ${code.segwit ? '<span class="segwit-badge">⚡ SEGWIT ENABLED</span>' : ''}
+          <span class="status-pill ${code.claimed ? 'success' : 'pending'}">
+            ${code.claimed ? 'Claimed ●' : 'Unclaimed'}
+          </span>
         </div>
       `).join('');
       
@@ -140,29 +138,29 @@
       let followersHtml = '';
       if (totalFollowers > 0) {
         followersHtml = `
-          <div class="followers-section">
-            <div class="section-title">Followers (${totalFollowers})</div>
+          <div style="margin-bottom: var(--space-xl);">
+            <h3 style="margin-bottom: var(--space-md);">Followers (${totalFollowers})</h3>
             <div id="followersGrid" class="followers-grid">
-              <div class="followers-loading">
-                <div class="spinner"></div>
-                <div>Loading followers...</div>
+              <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-lg);">
+                <div class="loading-spinner"></div>
+                <div style="color: var(--text-muted); margin-top: var(--space-sm);">Loading followers...</div>
               </div>
             </div>
-            <div id="expandedContent" class="expanded-content"></div>
-            ${totalFollowers > 6 ? `<button id="expandBtn" class="expand-btn" onclick="toggleFollowers()">Show all ${totalFollowers} followers</button>` : ''}
+            <div id="expandedContent" style="display: none;"></div>
+            ${totalFollowers > 8 ? `<button id="expandBtn" class="secondary" style="width: 100%;" onclick="toggleFollowers()">Show all ${totalFollowers} followers</button>` : ''}
           </div>
         `;
       }
       
       resultsContainer.innerHTML = `
-        <div class="result-card">
-          <div class="result-header">
+        <div class="result-section">
+          <div style="display: flex; align-items: center; gap: var(--space-lg); margin-bottom: var(--space-xl);">
             <div class="avatar-container">
-              <img src="${avatarUrl}" alt="Paynym Avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>🎭</text></svg>'">
+              <img src="${avatarUrl}" alt="Paynym Avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%22 height=%22100%22 fill=%22%23f5f3ef%22/><text x=%2250%22 y=%2255%22 font-size=%2240%22 text-anchor=%22middle%22>🎭</text></svg>'" style="width: 100%; height: 100%; border-radius: 50%;">
             </div>
-            <div class="result-info">
-              <div class="nym-name">${data.nymName || 'Unknown'}</div>
-              <div class="nym-id">${data.nymID}</div>
+            <div style="flex: 1;">
+              <div class="nym-name" style="font-size: 1.5rem; font-weight: 600; color: var(--text);">${data.nymName || 'Unknown'}</div>
+              <div class="nym-id code-text" style="color: var(--text-muted);">${data.nymID}</div>
             </div>
           </div>
           
@@ -183,9 +181,11 @@
           
           ${followersHtml}
           
-          <div class="codes-section">
-            <div class="section-title">Payment Codes</div>
-            ${codesHtml}
+          <div>
+            <h3 style="margin-bottom: var(--space-md);">Payment Codes</h3>
+            <div class="payment-codes-list">
+              ${codesHtml}
+            </div>
           </div>
         </div>
       `;
@@ -211,33 +211,34 @@
         const followerDetails = await response.json();
         currentFollowers = followerDetails;
         
-        // Display first 6 followers
-        displayFollowersGrid(followerDetails.slice(0, 6));
+        // Display first 8 followers
+        displayFollowersGrid(followerDetails.slice(0, 8));
         
         // Prepare expanded content with all followers
-        if (followerDetails.length > 6) {
+        if (followerDetails.length > 8) {
           const expandedGrid = document.getElementById('expandedContent');
-          expandedGrid.innerHTML = `<div class="followers-grid">${buildFollowersCards(followerDetails.slice(6))}</div>`;
+          expandedGrid.innerHTML = `<div class="followers-grid" style="margin-top: var(--space-lg);">${buildFollowersCards(followerDetails.slice(8))}</div>`;
         }
       } catch (error) {
         console.error('Error fetching follower details:', error);
         const grid = document.getElementById('followersGrid');
         if (grid) {
-          grid.innerHTML = '<div style="color: #ff4444; text-align: center;">Failed to load followers</div>';
+          grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: var(--space-lg); color: var(--mauve-dark);">Failed to load followers</div>';
         }
       }
     }
     
     function buildFollowersCards(followers) {
       return followers.map(follower => `
-        <div class="follower-card" onclick="searchFollower('${follower.nymId}')">
+        <div class="follower-card" onclick="searchFollower('${follower.nymId}')" style="cursor: pointer;">
           <div class="follower-avatar">
-            <img src="${follower.avatarUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>?</text></svg>'}" 
+            <img src="${follower.avatarUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%23f5f3ef%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22>?</text></svg>'}" 
                  alt="${follower.nymName}"
-                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%230a0e27%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>?</text></svg>'">
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect width=%22100%22 height=%22100%22 fill=%22%23f5f3ef%22/><text x=%2250%22 y=%2255%22 font-size=%2230%22 text-anchor=%22middle%22>?</text></svg>'" 
+                 style="width: 100%; height: 100%; border-radius: 50%;">
           </div>
           <div class="follower-name">${follower.nymName}</div>
-          <div class="follower-id">${follower.nymId.substring(0, 10)}...</div>
+          <div class="follower-id code-text" style="font-size: 0.65rem; color: var(--text-muted);">${follower.nymId.substring(0, 10)}...</div>
         </div>
       `).join('');
     }
@@ -253,12 +254,12 @@
       const expandedContent = document.getElementById('expandedContent');
       const expandBtn = document.getElementById('expandBtn');
       
-      if (expandedContent.classList.contains('visible')) {
-        expandedContent.classList.remove('visible');
-        expandBtn.textContent = `Show all ${currentFollowers.length} followers`;
-      } else {
-        expandedContent.classList.add('visible');
+      if (expandedContent.style.display === 'none') {
+        expandedContent.style.display = 'grid';
         expandBtn.textContent = 'Show fewer followers';
+      } else {
+        expandedContent.style.display = 'none';
+        expandBtn.textContent = `Show all ${currentFollowers.length} followers`;
       }
     }
     

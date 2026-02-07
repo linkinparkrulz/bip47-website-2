@@ -8,52 +8,47 @@
 </head>
 <body>
   <div class="container">
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-title">AUTH47_LOGIN_V1.0.0</div>
+    <a href="/" class="back-button">Back to Terminal</a>
+    
+    <div class="header">
+      <h1>AUTH47 LOGIN</h1>
+      <div class="header-nav">
+        <div class="status-led"></div>
+        <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">SYSTEM: ●</span>
       </div>
+    </div>
+    
+    <p class="subtitle">Bitcoin-based authentication using auth47 protocol</p>
+    
+    <div class="auth-panel">
+      <button id="startAuth" onclick="startAuth()" class="primary btn-large">
+        Generate Auth QR Code
+      </button>
       
-      <div class="terminal-content">
-        <div class="nav">
-          <a href="/">← Back to Terminal</a>
-        </div>
-        
-        <div class="header">
-          <h1>> AUTH47 LOGIN</h1>
-          <div class="subtitle">Bitcoin-based authentication using auth47 protocol</div>
-        </div>
-        
-        <div class="auth-card">
-          <button id="startAuth" onclick="startAuth()">
-            Generate Auth QR Code
-          </button>
-          
-          <div id="qrCode" style="display: none;"></div>
-          
-          <div id="status" style="display: none;"></div>
-          
-          <div id="result" style="display: none;">
-            <div class="result-title" id="result-icon">✅</div>
-            <img id="avatar" class="avatar" alt="Paynym Avatar">
-            <p class="nym-name" id="nym-name"></p>
-            <p class="payment-code" id="payment-code"></p>
-            <p class="countdown">
-              Resetting in <span id="countdown-timer">10</span> seconds...
-            </p>
-          </div>
-        </div>
-        
-        <div class="instructions">
-          <h3>📋 Instructions:</h3>
-          <ol>
-            <li>Click "Generate Auth QR Code" above</li>
-            <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
-            <li>Navigate to the Auth47 authentication feature</li>
-            <li>Scan the displayed QR code</li>
-            <li>Wait for automatic verification</li>
-          </ol>
-        </div>
+      <div id="qrCode" class="qr-container hidden"></div>
+      
+      <div id="status" class="status-message hidden"></div>
+      
+      <div id="result" class="result-panel hidden">
+        <div class="result-icon">✅</div>
+        <img id="avatar" class="avatar" alt="Paynym Avatar">
+        <p class="nym-name" id="nym-name"></p>
+        <p class="payment-code code-text" id="payment-code"></p>
+        <p class="countdown">
+          Resetting in <span id="countdown-timer">10</span> seconds...
+        </p>
       </div>
+    </div>
+    
+    <div class="tool-panel">
+      <h3 style="margin-bottom: var(--space-md);">📋 Instructions:</h3>
+      <ol style="margin-left: var(--space-lg); color: var(--text-muted); line-height: 1.8;">
+        <li>Click "Generate Auth QR Code" above</li>
+        <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
+        <li>Navigate to the Auth47 authentication feature</li>
+        <li>Scan the displayed QR code</li>
+        <li>Wait for automatic verification</li>
+      </ol>
     </div>
     
     <div class="footer">
@@ -86,11 +81,11 @@
       }
       
       btn.disabled = true;
-      status.style.display = 'block';
-      status.className = 'status';
-      status.innerHTML = '<div class="spinner"></div> Generating...';
-      qrDiv.style.display = 'none';
-      result.style.display = 'none';
+      status.classList.remove('hidden');
+      status.className = 'status-message pending';
+      status.innerHTML = '<div class="loading-spinner"></div> Generating...';
+      qrDiv.classList.add('hidden');
+      result.classList.add('hidden');
       
       try {
         const response = await fetch('/start-auth');
@@ -105,33 +100,34 @@
         qrDiv.innerHTML = `
           <img src="${data.qr}" alt="Auth QR Code">
           <div class="uri-display">
-            <div class="uri-label">Auth47 URI:</div>
-            <div class="uri-value">${data.uri}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-xs);">Auth47 URI:</div>
+            <div class="code-text" style="color: var(--blue); font-size: 0.75rem; word-break: break-all;">${data.uri}</div>
           </div>
-          <div class="uri-display" style="margin-top: 0.5rem;">
-            <div class="uri-label">Nonce:</div>
-            <div class="uri-value">${data.nonce}</div>
+          <div class="uri-display" style="margin-top: var(--space-sm);">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-xs);">Nonce:</div>
+            <div class="code-text" style="color: var(--sage-dark); font-size: 0.75rem;">${data.nonce}</div>
           </div>
-          <div class="qr-tap-hint" style="display: block;">
+          <div style="display: block; margin-top: var(--space-md); text-align: center; color: var(--text-muted); font-size: 0.8rem;">
             👆 Tap QR code to open in wallet app
           </div>
         `;
-        qrDiv.style.display = 'block';
+        qrDiv.classList.remove('hidden');
 
         // Make QR code clickable to open auth47:// URI
         const qrImg = qrDiv.querySelector('img');
         qrImg.onclick = () => {
           window.location.href = data.uri;
         };
+        qrImg.style.cursor = 'pointer';
         
-        status.className = 'status pending';
-        status.innerHTML = '📱 Waiting for wallet to scan... <div class="spinner"></div>';
+        status.className = 'status-message pending';
+        status.innerHTML = '📱 Waiting for wallet to scan... <div class="loading-spinner"></div>';
         
         // Start polling for verification
         startPolling(data.nonce);
         
       } catch (error) {
-        status.className = 'status error';
+        status.className = 'status-message error';
         status.innerHTML = `❌ Error: ${error.message}`;
         btn.disabled = false;
       }
@@ -173,12 +169,12 @@
       const qrDiv = document.getElementById('qrCode');
       
       // Hide QR code
-      qrDiv.style.display = 'none';
+      qrDiv.classList.add('hidden');
       
-      status.className = 'status success';
+      status.className = 'status-message success';
       status.innerHTML = '✅ Authentication Successful!';
       
-      result.style.display = 'block';
+      result.classList.remove('hidden');
       
       // Display nym name
       if (data.nym) {
@@ -273,8 +269,8 @@
       btn.disabled = false;
       
       // Hide status, result, and avatar
-      status.style.display = 'none';
-      result.style.display = 'none';
+      status.classList.add('hidden');
+      result.classList.add('hidden');
       avatarImg.classList.remove('show');
       avatarImg.src = '';
       
@@ -285,7 +281,7 @@
       const status = document.getElementById('status');
       const btn = document.getElementById('startAuth');
       
-      status.className = 'status error';
+      status.className = 'status-message error';
       status.innerHTML = `❌ ${message}`;
       
       btn.disabled = false;

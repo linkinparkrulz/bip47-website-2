@@ -8,70 +8,69 @@
 </head>
 <body>
   <div class="container">
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-title">BIP47_TERMINAL_V1.0.0</div>
+    <div class="header">
+      <h1>BIP47 SHOWCASE</h1>
+      <div class="header-nav">
+        <div class="status-led"></div>
+        <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">v2.0.0</span>
+      </div>
+    </div>
+    
+    <div class="showcase-header">
+      <p class="subtitle">Explore Bitcoin Payment Codes & Paynym Identity</p>
+    </div>
+    
+    <div class="card-grid">
+      <a href="/auth" class="card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">AUTH47 LOGIN</div>
+        <div class="card-description">Bitcoin-based authentication using auth47 protocol</div>
+        <div class="card-action">Authenticate</div>
+      </a>
+      
+      <a href="/lab" class="card">
+          <div class="card-icon">🧪</div>
+          <div class="card-title">BIP47 LAB</div>
+          <div class="card-description">Interactive payment code explorer and simulator</div>
+          <div class="card-action">Experiment</div>
+      </a>
+      
+      <a href="/guestbook" class="card">
+        <div class="card-icon">✍️</div>
+        <div class="card-title">GUESTBOOK</div>
+        <div class="card-description">Leave signed messages for the cypherpunk community</div>
+        <div class="card-action">Sign Message</div>
+      </a>
+      
+      <a href="/paynym" class="card">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">PAYNYM EXPLORER</div>
+        <div class="card-description">Search and explore Paynym identities</div>
+        <div class="card-action">Discover</div>
+      </a>
+      
+      <div class="card coming-soon relative">
+        <div class="coming-soon-badge">SOON</div>
+        <div class="card-icon">📚</div>
+        <div class="card-title">DOCUMENTATION</div>
+        <div class="card-description">Technical docs and API references</div>
+        <div class="card-action">Learn</div>
       </div>
       
-      <div class="terminal-content">
-        <div class="header" style="text-align: center; margin-bottom: var(--space-xl);">
-          <h1>BIP47 & PAYNYMS SHOWCASE</h1>
-          <div class="subtitle">Explore Bitcoin Payment Codes & Paynym Identity</div>
-        </div>
-        
-        <div class="card-grid">
-          <a href="/auth" class="card">
-            <div class="card-icon">🗝️</div>
-            <div class="card-title">AUTH47 LOGIN</div>
-            <div class="card-description">Bitcoin-based authentication using auth47 protocol</div>
-            <div class="card-action">[AUTHENTICATE]</div>
-          </a>
-          
-          <a href="/lab" class="card">
-              <div class="card-icon">⚗️</div>
-              <div class="card-title">BIP47 LAB</div>
-              <div class="card-description">Interactive payment code explorer and simulator</div>
-              <div class="card-action">[EXPERIMENT]</div>
-          </a>
-          
-          <a href="/guestbook" class="card">
-            <div class="card-icon">✍️</div>
-            <div class="card-title">GUESTBOOK</div>
-            <div class="card-description">Leave signed messages for the cypherpunk community</div>
-            <div class="card-action">[SIGN MESSAGE]</div>
-          </a>
-          
-          <a href="/paynym" class="card">
-            <div class="card-icon">🎭</div>
-            <div class="card-title">PAYNYM EXPLORER</div>
-            <div class="card-description">Search and explore Paynym identities</div>
-            <div class="card-action">[DISCOVER]</div>
-          </a>
-          
-          <div class="card coming-soon">
-            <div class="coming-soon-badge">SOON</div>
-            <div class="card-icon">📚</div>
-            <div class="card-title">DOCUMENTATION</div>
-            <div class="card-description">Technical docs and API references</div>
-            <div class="card-action">[LEARN]</div>
-          </div>
-          
-          <div class="card coming-soon">
-            <div class="coming-soon-badge">SOON</div>
-            <div class="card-icon">ℹ️</div>
-            <div class="card-title">ABOUT</div>
-            <div class="card-description">Learn about BIP47 and privacy in Bitcoin</div>
-            <div class="card-action">[INFO]</div>
-          </div>
-        </div>
-        
-        <div class="status-bar">
-          <div class="status-line"><span class="status-indicator"></span>SYSTEM STATUS: ONLINE</div>
-          <div class="status-line"><span class="status-indicator"></span>AUTH47 SERVICE: ACTIVE</div>
-          <div class="status-line"><span class="status-indicator"></span>BIP47 PROTOCOL: ENABLED</div>
-          <div class="status-line"><span class="status-indicator"></span>BITCOIN NETWORK: CONNECTED</div>
-        </div>
+      <div class="card coming-soon relative">
+        <div class="coming-soon-badge">SOON</div>
+        <div class="card-icon">ℹ️</div>
+        <div class="card-title">ABOUT</div>
+        <div class="card-description">Learn about BIP47 and privacy in Bitcoin</div>
+        <div class="card-action">Info</div>
       </div>
+    </div>
+    
+    <div class="status-bar">
+      <div class="status-line"><span class="status-led"></span>System Online</div>
+      <div class="status-line"><span class="status-led"></span>Auth47 Active</div>
+      <div class="status-line"><span class="status-led"></span>BIP47 Enabled</div>
+      <div class="status-line"><span class="status-led"></span>Bitcoin Connected</div>
     </div>
     
     <div class="footer">
