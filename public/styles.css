@@ -726,6 +726,415 @@ input:disabled, textarea:disabled {
 }
 
 /* ========================================
+   MISSING COMPONENT STYLES - RESTORED
+   ======================================== */
+
+/* Auth Panel */
+.auth-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+/* QR Container */
+.qr-container {
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+  box-shadow: var(--shadow-inset);
+  display: inline-block;
+}
+
+.qr-container img {
+  border-radius: var(--radius-sm);
+  max-width: 100%;
+  height: auto;
+}
+
+/* URI Display */
+.uri-display {
+  background: var(--surface-inset);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+/* Status Message */
+.status-message {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin: var(--space-md) 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.status-message.pending {
+  background: rgba(212, 196, 167, 0.2);
+  color: var(--amber-dark);
+}
+
+.status-message.success {
+  background: rgba(196, 212, 167, 0.2);
+  color: var(--sage-dark);
+}
+
+.status-message.error {
+  background: rgba(212, 167, 196, 0.2);
+  color: var(--mauve-dark);
+}
+
+/* Result Panel */
+.result-panel {
+  background: var(--surface-raised);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-top: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+.result-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.result-panel .avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto var(--space-md);
+  border: 3px solid var(--sage);
+  box-shadow: var(--shadow-md);
+  display: block;
+}
+
+.result-panel .avatar.show {
+  display: block;
+}
+
+.result-panel .nym-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-sm);
+}
+
+.result-panel .payment-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  margin-bottom: var(--space-md);
+}
+
+.result-panel .countdown {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Tool Panel */
+.tool-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(74, 69, 64, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: var(--space-md);
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-round);
+  box-shadow: none;
+}
+
+.close-btn:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+  transform: none;
+  box-shadow: none;
+}
+
+/* ========================================
+   MESSAGE CARD STYLES (Guestbook)
+   ======================================== */
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.message-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  gap: var(--space-md);
+  transition: all var(--press-duration) var(--press-easing);
+}
+
+.message-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.message-header .avatar,
+.message-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.message-header .avatar img,
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.message-meta {
+  flex: 1;
+}
+
+.message-meta .nym-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: var(--space-xs);
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.message-body {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-top: var(--space-sm);
+}
+
+/* ========================================
+   SCENARIO PANEL STYLES (Lab)
+   ======================================== */
+
+.scenario-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.scenario-step {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.scenario-step.hidden {
+  display: none;
+}
+
+.player-tokens {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: var(--space-xl);
+  position: relative;
+}
+
+.player-tokens::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  color: var(--text-muted);
+}
+
+.player-token {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: 1;
+}
+
+.player-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-md);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.player-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Validator Panel */
+.validator-panel {
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-inset);
+  margin-bottom: var(--space-lg);
+}
+
+/* Progress Indicator */
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding: var(--space-md);
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+}
+
+.progress-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-inset);
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all var(--transition-normal);
+}
+
+.progress-step.active {
+  background: var(--blue);
+  color: var(--surface);
+  box-shadow: 0 0 0 3px rgba(167, 196, 212, 0.3);
+}
+
+.progress-step.completed {
+  background: var(--sage);
+  color: var(--surface);
+}
+
+.progress-line {
+  flex: 1;
+  height: 2px;
+  background: var(--surface-inset);
+  transition: background var(--transition-normal);
+  max-width: 60px;
+}
+
+.progress-line.completed {
+  background: var(--sage);
+}
+
+/* ========================================
    PAGE SPECIFIC STYLES
    ======================================== */
 
