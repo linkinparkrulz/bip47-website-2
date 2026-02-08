@@ -292,35 +292,65 @@ button.primary:hover:not(:disabled) {
   box-shadow: none;
 }
 
-/* Status Bar - Refined */
-.status-bar {
+/* Supported By Section */
+.supported-by {
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: var(--space-lg);
   margin-bottom: var(--space-xl);
+  text-align: center;
 }
 
-.status-line {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin: var(--space-xs) 0;
+.supported-by-heading {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: var(--space-md);
+  font-weight: 500;
+}
+
+.logo-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.logo-link {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  justify-content: center;
+  transition: all var(--transition-normal);
+  filter: grayscale(100%);
+  opacity: 0.7;
 }
 
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
+.logo-link:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.1);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+.logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+/* Responsive: Stack logos on smaller screens */
+@media (max-width: 600px) {
+  .logo-grid {
+    gap: var(--space-lg);
+  }
+  
+  .logo-img {
+    height: 32px;
+    max-width: 100px;
+  }
 }
 
 /* Footer */
