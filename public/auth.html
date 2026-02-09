@@ -19,7 +19,7 @@
     }
     
     .auth-subtitle {
-      text-align: center;
+      text-align: left;
       color: var(--text-muted);
       font-size: 0.9rem;
       line-height: 1.5;
@@ -247,11 +247,11 @@
     <div class="main-content">
       <div class="header">
           <h1>> AUTH47 LOGIN</h1>
+          <div class="auth-subtitle">Bitcoin-based authentication using auth47 protocol</div>
+          <br/>
         </div>
         
-        <div class="auth-card">
-          <div class="auth-subtitle">Bitcoin-based authentication using auth47 protocol</div>
-          
+        <div class="auth-card">               
           <button id="startAuth" onclick="startAuth()">
             Generate Auth QR Code
           </button>
