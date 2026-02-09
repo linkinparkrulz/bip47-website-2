@@ -13,6 +13,58 @@
       border-radius: var(--radius-md);
       padding: var(--space-xl);
       margin-bottom: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+    
+    .auth-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .auth-supported-by {
+      text-align: center;
+      margin-top: var(--space-sm);
+    }
+    
+    .auth-supported-heading {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: var(--space-sm);
+      font-weight: 500;
+    }
+    
+    .auth-logo-grid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+    }
+    
+    .auth-logo-grid .logo-link {
+      filter: grayscale(100%);
+      opacity: 0.7;
+      transition: all var(--transition-normal);
+    }
+    
+    .auth-logo-grid .logo-link:hover {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    
+    .auth-logo-grid .logo-img {
+      height: 32px;
+      width: auto;
+      max-width: 100px;
+      object-fit: contain;
     }
     
     #qrCode {
@@ -195,13 +247,29 @@
     <div class="main-content">
       <div class="header">
           <h1>> AUTH47 LOGIN</h1>
-          <div class="subtitle">Bitcoin-based authentication using auth47 protocol</div>
         </div>
         
         <div class="auth-card">
+          <div class="auth-subtitle">Bitcoin-based authentication using auth47 protocol</div>
+          
           <button id="startAuth" onclick="startAuth()">
             Generate Auth QR Code
           </button>
+          
+          <div class="auth-supported-by">
+            <div class="auth-supported-heading">Auth47 Supported By</div>
+            <div class="auth-logo-grid">
+              <a href="https://freesamourai.com" target="_blank" rel="noopener noreferrer" class="logo-link" title="Samourai Wallet">
+                <img src="logos/samourai.png" alt="Samourai Wallet" class="logo-img">
+              </a>
+              <a href="https://ashigaru.rs" target="_blank" rel="noopener noreferrer" class="logo-link" title="Ashigaru">
+                <img src="logos/Ashigaru.png" alt="Ashigaru" class="logo-img">
+              </a>
+              <a href="https://sparrowwallet.com" target="_blank" rel="noopener noreferrer" class="logo-link" title="Sparrow Wallet">
+                <img src="logos/sparrow.png" alt="Sparrow Wallet" class="logo-img">
+              </a>
+            </div>
+          </div>
           
           <div id="qrCode" style="display: none;"></div>
           
@@ -222,9 +290,8 @@
           <h3>📋 Instructions:</h3>
           <ol>
             <li>Click "Generate Auth QR Code" above</li>
-            <li>Open your Samourai Wallet or compatible BIP47 wallet</li>
-            <li>Navigate to the Auth47 authentication feature</li>
-            <li>Scan the displayed QR code</li>
+            <li>Open Ashigaru or a compatible BIP47 wallet</li>
+            <li>Scan or copy the displayed QR code</li>
             <li>Wait for automatic verification</li>
           </ol>
         </div>
