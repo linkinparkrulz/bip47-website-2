@@ -330,6 +330,45 @@
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
         }
+
+        /* Summary stats for step 4 */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .summary-stats .stat-box {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0,255,65,0.05);
+            border-radius: 4px;
+        }
+
+        .summary-stats .stat-box:nth-child(3) {
+            background: rgba(255,100,100,0.05);
+        }
+
+        .summary-stats .stat-value {
+            font-size: 1.5rem;
+            color: #00ff41;
+        }
+
+        .summary-stats .stat-box:nth-child(3) .stat-value {
+            color: #ff6666;
+        }
+
+        .summary-stats .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 <body>
     <div class="container">
@@ -486,18 +525,18 @@
                                     <strong>Key Insight:</strong> Alice can generate addresses and send payments, but <em>only Bob can spend them</em> because only he knows private key <code>b</code>. This is the magic of BIP47—one-way address derivation.
                                 </div>
 
-                                <div class="summary-stats" id="receiving-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">1</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Notification TX</div>
+                                <div class="summary-stats" id="receiving-summary">
+                                    <div class="stat-box">
+                                        <div class="stat-value">1</div>
+                                        <div class="stat-label">Notification TX</div>
                                     </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">∞</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Payment Addresses</div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">∞</div>
+                                        <div class="stat-label">Payment Addresses</div>
                                     </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(255,100,100,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #ff6666;">0</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Address Reuse</div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">0</div>
+                                        <div class="stat-label">Address Reuse</div>
                                     </div>
                                 </div>
 

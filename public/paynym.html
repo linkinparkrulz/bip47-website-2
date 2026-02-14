@@ -126,6 +126,18 @@
       border-radius: var(--radius-md);
       padding: var(--space-md);
       text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .stat-box:hover {
+      border-color: var(--accent-primary);
+      background: rgba(74, 222, 128, 0.05);
+    }
+
+    .stat-box.active {
+      border-color: var(--accent-primary);
+      background: rgba(74, 222, 128, 0.1);
     }
     
     .stat-value {
@@ -577,23 +589,11 @@
         </div>
       `).join('');
       
-      // Build social section with tabs
+      // Build social section (no tabs, stat boxes handle navigation)
       let socialHtml = '';
       if (totalFollowers > 0 || totalFollowing > 0) {
         socialHtml = `
           <div class="followers-section">
-            <div class="section-tabs">
-              <button class="tab-btn ${currentDisplayMode === 'followers' ? 'active' : ''}" 
-                      onclick="switchTab('followers')" 
-                      id="tab-followers">
-                Followers (${totalFollowers})
-              </button>
-              <button class="tab-btn ${currentDisplayMode === 'following' ? 'active' : ''}" 
-                      onclick="switchTab('following')" 
-                      id="tab-following">
-                Following (${totalFollowing})
-              </button>
-            </div>
             <div id="socialGrid" class="followers-grid">
               <div class="followers-loading">
                 <div class="spinner"></div>
@@ -619,15 +619,15 @@
           </div>
           
           <div class="stats-grid">
-            <div class="stat-box">
+            <div class="stat-box" id="stat-codes" onclick="scrollToCodes()">
               <div class="stat-value">${totalCodes}</div>
               <div class="stat-label">Payment Codes</div>
             </div>
-            <div class="stat-box clickable" onclick="switchTab('followers')">
+            <div class="stat-box" id="stat-followers" onclick="switchTab('followers')">
               <div class="stat-value">${totalFollowers}</div>
               <div class="stat-label">Followers</div>
             </div>
-            <div class="stat-box clickable" onclick="switchTab('following')">
+            <div class="stat-box" id="stat-following" onclick="switchTab('following')">
               <div class="stat-value">${totalFollowing}</div>
               <div class="stat-label">Following</div>
             </div>
@@ -653,12 +653,19 @@
     async function switchTab(mode) {
       currentDisplayMode = mode;
       
-      // Update tab buttons
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`tab-${mode}`).classList.add('active');
+      // Update stat box active states
+      document.querySelectorAll('.stat-box').forEach(box => box.classList.remove('active'));
+      document.getElementById(`stat-${mode}`).classList.add('active');
       
       // Load the tab content
       await loadSocialTab(mode);
+    }
+
+    function scrollToCodes() {
+      const codesSection = document.querySelector('.codes-section');
+      if (codesSection) {
+        codesSection.scrollIntoView({ behavior: 'smooth' });
+      }
     }
     
     async function loadSocialTab(mode) {
