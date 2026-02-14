@@ -318,28 +318,36 @@
     </style>
 </head>
 <body>
-    <div class="nav-bar">
-        <a href="/" class="back-link">← Back to Home</a>
-        <span style="color: var(--text-muted); font-size: 0.8rem;">[DOCUMENTATION]</span>
-    </div>
+    <div class="container">
+        <div class="nav-bar">
+            <a href="/" class="back-link">← Back to Home</a>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">[DOCUMENTATION]</span>
+        </div>
 
-    <div class="docs-container">
-        <aside class="sidebar">
-            <div class="sidebar-title">Contents</div>
-            <ul class="sidebar-nav">
-                <li><a href="#getting-started" class="active">Getting Started</a></li>
-                <li><a href="#bip47-protocol">BIP47 Protocol</a></li>
-                <li><a href="#auth47-spec">Auth47 Specification</a></li>
-                <li><a href="#paynym-api">Paynym API</a></li>
-                <li><a href="#code-examples">Code Examples</a></li>
-                <li><a href="#resources">Resources</a></li>
-            </ul>
-        </aside>
+        <div class="main-content">
+            <div class="header">
+                <h1>> DOCUMENTATION</h1>
+                <div class="subtitle">BIP47 protocol, Auth47 specification, and API references</div>
+                <br/>
+            </div>
 
-        <main class="content">
-            <!-- Getting Started -->
-            <section class="doc-section" id="getting-started">
-                <h2>> Getting Started</h2>
+            <div class="docs-container">
+                <aside class="sidebar">
+                    <div class="sidebar-title">Contents</div>
+                    <ul class="sidebar-nav">
+                        <li><a href="#getting-started" class="active">Getting Started</a></li>
+                        <li><a href="#bip47-protocol">BIP47 Protocol</a></li>
+                        <li><a href="#auth47-spec">Auth47 Specification</a></li>
+                        <li><a href="#paynym-api">Paynym API</a></li>
+                        <li><a href="#code-examples">Code Examples</a></li>
+                        <li><a href="#resources">Resources</a></li>
+                    </ul>
+                </aside>
+
+                <main class="content">
+                    <!-- Getting Started -->
+                    <section class="doc-section" id="getting-started">
+                        <h2>> Getting Started</h2>
                 <p class="section-intro">
                     Welcome to the BIP47 documentation. Here you'll find everything you need to understand 
                     and implement reusable payment codes, Auth47 authentication, and Paynym identity services.
@@ -984,11 +992,13 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
                 </div>
             </section>
 
-            <div class="footer" style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-subtle);">
-                <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
-                <div class="footer-text">Privacy is a human fight</div>
+                    <div class="footer" style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-subtle);">
+                        <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
+                        <div class="footer-text">Privacy is a human fight</div>
+                    </div>
+                </main>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
