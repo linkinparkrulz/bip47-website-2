@@ -26,6 +26,55 @@
             }
         }
 
+        /* Mobile sidebar toggle */
+        .sidebar-toggle {
+            display: none;
+            width: 100%;
+            padding: var(--space-md);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: var(--space-md);
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-surface);
+            border-color: var(--border-default);
+        }
+
+        .sidebar-toggle-icon {
+            display: inline-block;
+            transition: transform var(--transition-fast);
+            margin-left: var(--space-sm);
+        }
+
+        .sidebar-toggle[aria-expanded="true"] .sidebar-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .sidebar-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height var(--transition-normal);
+            }
+
+            .sidebar-content.expanded {
+                max-height: 500px;
+            }
+        }
+
         .sidebar {
             position: sticky;
             top: var(--space-xl);
@@ -333,15 +382,21 @@
 
             <div class="docs-container">
                 <aside class="sidebar">
-                    <div class="sidebar-title">Contents</div>
-                    <ul class="sidebar-nav">
-                        <li><a href="#getting-started" class="active">Getting Started</a></li>
-                        <li><a href="#bip47-protocol">BIP47 Protocol</a></li>
-                        <li><a href="#auth47-spec">Auth47 Specification</a></li>
-                        <li><a href="#paynym-api">Paynym API</a></li>
-                        <li><a href="#code-examples">Code Examples</a></li>
-                        <li><a href="#resources">Resources</a></li>
-                    </ul>
+                    <button class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-content">
+                        <span>📋 Contents</span>
+                        <span class="sidebar-toggle-icon">▼</span>
+                    </button>
+                    <div class="sidebar-content" id="sidebar-content">
+                        <div class="sidebar-title">Contents</div>
+                        <ul class="sidebar-nav">
+                            <li><a href="#getting-started" class="active">Getting Started</a></li>
+                            <li><a href="#bip47-protocol">BIP47 Protocol</a></li>
+                            <li><a href="#auth47-spec">Auth47 Specification</a></li>
+                            <li><a href="#paynym-api">Paynym API</a></li>
+                            <li><a href="#code-examples">Code Examples</a></li>
+                            <li><a href="#resources">Resources</a></li>
+                        </ul>
+                    </div>
                 </aside>
 
                 <main class="content">
@@ -1058,6 +1113,18 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
         }, observerOptions);
 
         sections.forEach(section => observer.observe(section));
+
+        // Mobile sidebar toggle functionality
+        const sidebarToggle = document.querySelector('.sidebar-toggle');
+        const sidebarContent = document.querySelector('.sidebar-content');
+
+        if (sidebarToggle && sidebarContent) {
+            sidebarToggle.addEventListener('click', () => {
+                const isExpanded = sidebarToggle.getAttribute('aria-expanded') === 'true';
+                sidebarToggle.setAttribute('aria-expanded', !isExpanded);
+                sidebarContent.classList.toggle('expanded');
+            });
+        }
 
         console.log('✅ Documentation page loaded');
     </script>
