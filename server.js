@@ -547,6 +547,28 @@ app.get('/guestbook', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'guestbook.html'));
 });
 
+// Documentation page route
+app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'docs.html'));
+});
+
+// QR Code generation endpoint for payment codes
+app.get('/api/qr', async (req, res) => {
+  try {
+    const { text } = req.query;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Missing text parameter' });
+    }
+    
+    const qr = await QRCode.toDataURL(text);
+    res.json({ qr });
+  } catch (error) {
+    console.error('💥 QR generation error:', error);
+    res.status(500).json({ error: 'Failed to generate QR code' });
+  }
+});
+
 // Guestbook API endpoints
 
 // GET /api/guestbook/messages - List all verified messages

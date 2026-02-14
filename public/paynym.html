@@ -205,6 +205,68 @@
       color: var(--accent-secondary);
       margin-top: var(--space-sm);
       display: inline-block;
+      cursor: help;
+      border-bottom: 1px dotted var(--accent-secondary);
+    }
+
+    .code-actions {
+      margin-top: var(--space-sm);
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    .qr-container {
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      text-align: center;
+      display: none;
+    }
+
+    .qr-container.visible {
+      display: block;
+    }
+
+    .qr-container img {
+      max-width: 200px;
+      border: 2px solid var(--border-default);
+      border-radius: var(--radius-sm);
+    }
+
+    .following-section {
+      margin-top: var(--space-lg);
+    }
+
+    .section-tabs {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+      width: auto;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active {
+      background: rgba(74, 222, 128, 0.1);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
     }
     
     /* Loading State */
@@ -475,25 +537,13 @@
       }
     }
     
-    // Store current followers data for expand functionality
+    // Store current data for toggle functionality
     let currentFollowers = [];
+    let currentFollowing = [];
+    let currentDisplayMode = 'followers'; // 'followers' or 'following'
     
     async function displayResults(data) {
       const resultsContainer = document.getElementById('resultsContainer');
-      
-      // Build payment codes HTML
-      const codesHtml = data.codes.map(code => `
-        <div class="code-item">
-          <div class="code-header">
-            <span class="code-label">Payment Code</span>
-            <span class="code-status ${code.claimed ? 'status-claimed' : 'status-unclaimed'}">
-              ${code.claimed ? 'CLAIMED' : 'UNCLAIMED'}
-            </span>
-          </div>
-          <div class="code-value">${code.code}</div>
-          ${code.segwit ? '<span class="segwit-badge">⚡ SEGWIT ENABLED</span>' : ''}
-        </div>
-      `).join('');
       
       // Calculate total stats
       const totalFollowing = data.following ? data.following.length : 0;
@@ -504,20 +554,54 @@
       const primaryCode = data.codes && data.codes.length > 0 ? data.codes[0].code : '';
       const avatarUrl = primaryCode ? `https://paynym.rs/${primaryCode}/avatar` : '';
       
-      // Build followers section (will be populated async)
-      let followersHtml = '';
-      if (totalFollowers > 0) {
-        followersHtml = `
+      // Build payment codes HTML with copy and QR buttons
+      const codesHtml = data.codes.map((code, index) => `
+        <div class="code-item">
+          <div class="code-header">
+            <span class="code-label">Payment Code</span>
+            <span class="code-status ${code.claimed ? 'status-claimed' : 'status-unclaimed'}">
+              ${code.claimed ? 'CLAIMED' : 'UNCLAIMED'}
+            </span>
+          </div>
+          <div class="code-value" id="code-${index}">${code.code}</div>
+          <div class="code-actions">
+            <button class="copy-btn" onclick="copyToClipboard('${code.code}', this)">
+              📋 Copy
+            </button>
+            <button class="qr-toggle-btn" onclick="toggleQR('${code.code}', 'qr-${index}')">
+              📱 QR Code
+            </button>
+          </div>
+          <div id="qr-${index}" class="qr-container"></div>
+          ${code.segwit ? '<span class="segwit-badge" title="Segwit payment codes use bech32 encoding for lower transaction fees. Legacy codes use base58. Both work, but segwit is recommended for new payments.">⚡ SEGWIT ENABLED</span>' : ''}
+        </div>
+      `).join('');
+      
+      // Build social section with tabs
+      let socialHtml = '';
+      if (totalFollowers > 0 || totalFollowing > 0) {
+        socialHtml = `
           <div class="followers-section">
-            <div class="section-title">Followers (${totalFollowers})</div>
-            <div id="followersGrid" class="followers-grid">
+            <div class="section-tabs">
+              <button class="tab-btn ${currentDisplayMode === 'followers' ? 'active' : ''}" 
+                      onclick="switchTab('followers')" 
+                      id="tab-followers">
+                Followers (${totalFollowers})
+              </button>
+              <button class="tab-btn ${currentDisplayMode === 'following' ? 'active' : ''}" 
+                      onclick="switchTab('following')" 
+                      id="tab-following">
+                Following (${totalFollowing})
+              </button>
+            </div>
+            <div id="socialGrid" class="followers-grid">
               <div class="followers-loading">
                 <div class="spinner"></div>
-                <div>Loading followers...</div>
+                <div>Loading...</div>
               </div>
             </div>
             <div id="expandedContent" class="expanded-content"></div>
-            ${totalFollowers > 6 ? `<button id="expandBtn" class="expand-btn" onclick="toggleFollowers()">Show all ${totalFollowers} followers</button>` : ''}
+            <button id="expandBtn" class="expand-btn" style="display: none;" onclick="toggleExpanded()">Show all</button>
           </div>
         `;
       }
@@ -539,17 +623,17 @@
               <div class="stat-value">${totalCodes}</div>
               <div class="stat-label">Payment Codes</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-box clickable" onclick="switchTab('followers')">
               <div class="stat-value">${totalFollowers}</div>
               <div class="stat-label">Followers</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-box clickable" onclick="switchTab('following')">
               <div class="stat-value">${totalFollowing}</div>
               <div class="stat-label">Following</div>
             </div>
           </div>
           
-          ${followersHtml}
+          ${socialHtml}
           
           <div class="codes-section">
             <div class="section-title">Payment Codes</div>
@@ -558,9 +642,142 @@
         </div>
       `;
       
-      // Fetch follower details if there are followers
-      if (totalFollowers > 0) {
-        await fetchFollowerDetails(data.followers);
+      // Store data for toggling
+      currentFollowers = data.followers || [];
+      currentFollowing = data.following || [];
+      
+      // Load initial tab
+      await loadSocialTab(currentDisplayMode);
+    }
+    
+    async function switchTab(mode) {
+      currentDisplayMode = mode;
+      
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`tab-${mode}`).classList.add('active');
+      
+      // Load the tab content
+      await loadSocialTab(mode);
+    }
+    
+    async function loadSocialTab(mode) {
+      const grid = document.getElementById('socialGrid');
+      const expandBtn = document.getElementById('expandBtn');
+      const expandedContent = document.getElementById('expandedContent');
+      
+      // Hide expanded content when switching
+      expandedContent.classList.remove('visible');
+      
+      const items = mode === 'followers' ? currentFollowers : currentFollowing;
+      const total = items.length;
+      
+      if (total === 0) {
+        grid.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: var(--space-lg);">No ${mode} yet</div>`;
+        expandBtn.style.display = 'none';
+        return;
+      }
+      
+      grid.innerHTML = `
+        <div class="followers-loading">
+          <div class="spinner"></div>
+          <div>Loading ${mode}...</div>
+        </div>
+      `;
+      
+      try {
+        const nymIds = items.map(f => f.nymId);
+        const response = await fetch('/api/paynym/followers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nymIds: nymIds.slice(0, 6) })
+        });
+        
+        const details = await response.json();
+        
+        // Display first 6
+        grid.innerHTML = buildFollowersCards(details);
+        
+        // Setup expand button if needed
+        if (total > 6) {
+          expandBtn.style.display = 'block';
+          expandBtn.textContent = `Show all ${total} ${mode}`;
+          expandBtn.onclick = () => toggleExpanded(mode, nymIds);
+          
+          // Prepare expanded content
+          const remainingResponse = await fetch('/api/paynym/followers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nymIds: nymIds.slice(6) })
+          });
+          const remainingDetails = await remainingResponse.json();
+          expandedContent.innerHTML = `<div class="followers-grid">${buildFollowersCards(remainingDetails)}</div>`;
+        } else {
+          expandBtn.style.display = 'none';
+          expandedContent.innerHTML = '';
+        }
+      } catch (error) {
+        console.error(`Error loading ${mode}:`, error);
+        grid.innerHTML = `<div style="color: #ff4444; text-align: center;">Failed to load ${mode}</div>`;
+      }
+    }
+    
+    function toggleExpanded(mode, nymIds) {
+      const expandedContent = document.getElementById('expandedContent');
+      const expandBtn = document.getElementById('expandBtn');
+      const items = mode === 'followers' ? currentFollowers : currentFollowing;
+      
+      if (expandedContent.classList.contains('visible')) {
+        expandedContent.classList.remove('visible');
+        expandBtn.textContent = `Show all ${items.length} ${mode}`;
+      } else {
+        expandedContent.classList.add('visible');
+        expandBtn.textContent = `Show fewer ${mode}`;
+      }
+    }
+    
+    async function copyToClipboard(text, btn) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        btn.innerHTML = '❌ Failed';
+        setTimeout(() => {
+          btn.innerHTML = '📋 Copy';
+        }, 2000);
+      }
+    }
+    
+    async function toggleQR(paymentCode, containerId) {
+      const container = document.getElementById(containerId);
+      
+      if (container.classList.contains('visible')) {
+        container.classList.remove('visible');
+        container.innerHTML = '';
+      } else {
+        container.innerHTML = '<div class="spinner" style="width: 30px; height: 30px;"></div>';
+        container.classList.add('visible');
+        
+        try {
+          const response = await fetch(`/api/qr?text=${encodeURIComponent(paymentCode)}`);
+          const data = await response.json();
+          
+          if (data.qr) {
+            container.innerHTML = `<img src="${data.qr}" alt="Payment Code QR">`;
+          } else {
+            container.innerHTML = '<div style="color: #ff4444;">Failed to generate QR</div>';
+          }
+        } catch (error) {
+          console.error('QR generation error:', error);
+          container.innerHTML = '<div style="color: #ff4444;">Failed to generate QR</div>';
+        }
       }
     }
     

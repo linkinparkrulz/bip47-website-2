@@ -266,6 +266,52 @@
             margin: var(--space-xs) 0;
         }
 
+        /* Mobile overflow fix for addresses */
+        .address-list {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .address-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(0,255,65,0.05);
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            min-width: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .address-item .addr-index {
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        .address-item .addr-value {
+            color: #00ff41;
+            font-family: monospace;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            min-width: 0;
+            flex: 1;
+        }
+
+        @media (max-width: 600px) {
+            .address-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .address-item .addr-value {
+                font-size: 0.75rem;
+                word-break: break-all;
+            }
+        }
+
         .highlight-box {
             background: rgba(74, 222, 128, 0.05);
             border-left: 3px solid var(--accent-primary);
@@ -645,10 +691,11 @@
             addresses.forEach((a, i) => {
                 setTimeout(() => {
                     const div = document.createElement('div');
-                    div.style.cssText = 'padding: 0.5rem; background: rgba(0,255,65,0.05); margin: 0.25rem 0; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; animation: slideIn 0.3s ease;';
+                    div.className = 'address-item';
+                    div.style.animation = 'slideIn 0.3s ease';
                     div.innerHTML = `
-                        <span style="color: #888;">#${a.idx}</span>
-                        <span style="color: #00ff41; font-family: monospace;">${a.addr}</span>
+                        <span class="addr-index">#${a.idx}</span>
+                        <span class="addr-value">${a.addr}</span>
                     `;
                     list.appendChild(div);
                 }, i * 200);

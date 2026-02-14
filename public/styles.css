@@ -480,3 +480,142 @@ input::placeholder, textarea::placeholder {
 .mb-sm { margin-bottom: var(--space-sm); }
 .mb-md { margin-bottom: var(--space-md); }
 .mb-lg { margin-bottom: var(--space-lg); }
+
+/* Tooltip Styles */
+.tooltip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--accent-secondary);
+}
+
+.tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+  white-space: normal;
+  text-align: center;
+}
+
+.tooltip:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--border-default);
+  z-index: 1001;
+}
+
+/* Copy Button Styles */
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--accent-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-left: var(--space-sm);
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.copy-btn:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-secondary);
+}
+
+.copy-btn.copied {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* QR Code Display */
+.qr-display {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.qr-display img {
+  max-width: 200px;
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.qr-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--accent-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-left: var(--space-sm);
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.qr-toggle-btn:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent-secondary);
+}
+
+/* Clickable Stats */
+.stat-box.clickable {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stat-box.clickable:hover {
+  border-color: var(--accent-primary);
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.stat-box.active {
+  border-color: var(--accent-primary);
+  background: rgba(74, 222, 128, 0.1);
+  box-shadow: 0 0 10px var(--glow-subtle);
+}
+
+/* Mobile overflow fix for addresses */
+.address-item {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.address-item::-webkit-scrollbar {
+  height: 4px;
+}
+
+.address-item::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.address-item::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 2px;
+}
