@@ -396,6 +396,28 @@
       font-family: var(--font-data);
     }
     
+    /* Mobile responsive fixes */
+    @media (max-width: 500px) {
+      .result-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .avatar-container {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .nym-name {
+        font-size: 1.2rem;
+        word-break: break-word;
+      }
+      
+      .nym-id {
+        font-size: 0.75rem;
+      }
+    }
+    
     /* Expand Button */
     .expand-btn {
       background: var(--bg-elevated);
