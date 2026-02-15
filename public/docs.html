@@ -19,6 +19,8 @@
         @media (max-width: 900px) {
             .docs-container {
                 grid-template-columns: 1fr;
+                max-width: none;
+                padding: var(--space-md);
             }
             .sidebar {
                 position: static;
@@ -392,7 +394,7 @@
                             <li><a href="#getting-started" class="active">Getting Started</a></li>
                             <li><a href="#bip47-protocol">BIP47 Protocol</a></li>
                             <li><a href="#auth47-spec">Auth47 Specification</a></li>
-                            <li><a href="#paynym-api">Paynym API</a></li>
+                            <li><a href="#paynym-api">PayNym API</a></li>
                             <li><a href="#code-examples">Code Examples</a></li>
                             <li><a href="#resources">Resources</a></li>
                         </ul>
@@ -405,7 +407,7 @@
                         <h2>> Getting Started</h2>
                 <p class="section-intro">
                     Welcome to the BIP47 documentation. Here you'll find everything you need to understand 
-                    and implement reusable payment codes, Auth47 authentication, and Paynym identity services.
+                    and implement reusable payment codes, Auth47 authentication, and PayNym identity services.
                 </p>
 
                 <h3>What is BIP47?</h3>
@@ -422,9 +424,9 @@
                     using Bitcoin wallets.
                 </p>
 
-                <h3>What is Paynym?</h3>
+                <h3>What is PayNym?</h3>
                 <p>
-                    Paynym is a social layer built on BIP47 payment codes. It provides human-readable 
+                    PayNym is a social layer built on BIP47 payment codes. It provides human-readable 
                     identifiers (like <code>+littlevoice</code>) and a social graph of followers/following, 
                     making it easier to discover and pay other Bitcoin users.
                 </p>
@@ -606,12 +608,12 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                 </div>
             </section>
 
-            <!-- Paynym API -->
+            <!-- PayNym API -->
             <section class="doc-section" id="paynym-api">
-                <h2>> Paynym API</h2>
+                <h2>> PayNym API</h2>
                 <p class="section-intro">
-                    The Paynym API provides endpoints for creating and managing Paynym identities, 
-                    following other Paynyms, and retrieving payment code information.
+                    The PayNym API provides endpoints for creating and managing PayNym identities, 
+                    following other PayNyms, and retrieving payment code information.
                 </p>
 
                 <h3>Base URL</h3>
@@ -625,17 +627,17 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                 <h3>Public Endpoints</h3>
                 <p>
                     These endpoints do not require authentication and can be used to look up 
-                    Paynym information.
+                    PayNym information.
                 </p>
 
-                <h4>Create Paynym</h4>
+                <h4>Create PayNym</h4>
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="http-method http-post">POST</span>
                         <span class="endpoint-path">/create</span>
                     </div>
                     <div class="endpoint-body">
-                        <p>Create a new Paynym entry in the database.</p>
+                        <p>Create a new PayNym entry in the database.</p>
                         <table class="param-table">
                             <thead>
                                 <tr>
@@ -689,7 +691,7 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                         <span class="endpoint-path">/nym</span>
                     </div>
                     <div class="endpoint-body">
-                        <p>Retrieve all known information about a Paynym account.</p>
+                        <p>Retrieve all known information about a PayNym account.</p>
                         <table class="param-table">
                             <thead>
                                 <tr>
@@ -783,7 +785,7 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                         <span class="endpoint-path">/follow</span>
                     </div>
                     <div class="endpoint-body">
-                        <p>Follow another Paynym account.</p>
+                        <p>Follow another PayNym account.</p>
                         <table class="param-table">
                             <thead>
                                 <tr>
@@ -814,7 +816,7 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                         <span class="endpoint-path">/unfollow</span>
                     </div>
                     <div class="endpoint-body">
-                        <p>Unfollow a Paynym account. Same parameters as /follow.</p>
+                        <p>Unfollow a PayNym account. Same parameters as /follow.</p>
                     </div>
                 </div>
 
@@ -858,8 +860,8 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                 <div class="info-box">
                     <p>
                         <strong>Tip:</strong> Use the 
-                        <a href="/paynym" style="color: var(--accent-secondary);">Paynym Explorer</a> 
-                        to look up Paynym details and see the API in action.
+                        <a href="/paynym" style="color: var(--accent-secondary);">PayNym Explorer</a> 
+                        to look up PayNym details and see the API in action.
                     </p>
                 </div>
             </section>
@@ -932,7 +934,7 @@ if (result.result === 'ok') {
 }</code></pre>
                 </div>
 
-                <h3>Lookup Paynym</h3>
+                <h3>Lookup PayNym</h3>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="lang">JavaScript</span>
@@ -950,7 +952,7 @@ console.log(data.nymID);    // "wXGgdC..."
 console.log(data.codes[0].code);  // Payment code</code></pre>
                 </div>
 
-                <h3>Get Paynym Avatar</h3>
+                <h3>Get PayNym Avatar</h3>
                 <div class="code-block">
                     <div class="code-header">
                         <span class="lang">URL Pattern</span>
@@ -967,7 +969,7 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
             <section class="doc-section" id="resources">
                 <h2>> Resources</h2>
                 <p class="section-intro">
-                    Official specifications, libraries, and community resources for BIP47 and Paynym.
+                    Official specifications, libraries, and community resources for BIP47 and PayNym.
                 </p>
 
                 <h3>Official Specifications</h3>
@@ -1013,27 +1015,27 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
                     <li>
                         <a href="https://samouraiwallet.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
                             Samourai Wallet
-                        </a> - Android wallet with full BIP47 support
+                        </a> - Android wallet with full BIP47/PayNym support
                     </li>
                     <li>
                         <a href="https://sparrowwallet.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
                             Sparrow Wallet
-                        </a> - Desktop wallet with Paynym integration
+                        </a> - Desktop wallet with full BIP47/PayNym support
                     </li>
                     <li>
                         <a href="https://bluewallet.io" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
                             BlueWallet
-                        </a> - Mobile wallet with BIP47 support
+                        </a> - Android/iOS wallet with Non-Segwit BIP47 support
                     </li>
                     <li>
                         <a href="https://stackwallet.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
                             Stack Wallet
-                        </a> - Multi-coin wallet with Paynym integration
+                        </a> - Android/iOS/Desktop wallet with BIP47/PayNym integration
                     </li>
                     <li>
                         <a href="https://ashigaru.rs" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
                             Ashigaru
-                        </a> - Auth47-compatible wallet
+                        </a> - Android wallet with full BIP47/PayNym support
                     </li>
                 </ul>
 
@@ -1041,8 +1043,8 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
                 <ul>
                     <li>
                         <a href="https://paynym.rs" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
-                            Paynym.rs
-                        </a> - Paynym directory and API
+                            PayNym.rs
+                        </a> - PayNym directory and API
                     </li>
                     <li>
                         <a href="https://billandkeonne.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent-secondary);">
@@ -1067,7 +1069,7 @@ https://paynym.rs/PM8TJYp8zHvhimVNRjUcEuULfmvmUML6YTbTSnU69MYy93AzsXELFLaVjpxc5m
                 </div>
             </section>
 
-                    <div class="footer" style="margin-top: var(--space-2xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-subtle);">
+                    <div class="footer">
                         <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
                         <div class="footer-text">Privacy is a human fight</div>
                     </div>

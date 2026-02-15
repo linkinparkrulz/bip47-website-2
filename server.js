@@ -503,7 +503,7 @@ app.post('/api/bip47/validate', (req, res) => {
 
     const checks = {
       format: paymentCode.startsWith('PM8T'),
-      length: paymentCode.length === 80,
+      length: paymentCode.length === 111,
       base58: /^[1-9A-HJ-NP-Za-km-z]+$/.test(paymentCode),
       checksum: false,
       version: false
