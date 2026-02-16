@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIP47 Lab - Payment Code Tools</title>
+    <link rel="icon" type="image/x-icon" href="/logos/favicons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/logos/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/logos/favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/logos/favicons/apple-touch-icon.png">
+    <link rel="manifest" href="/logos/favicons/site.webmanifest">
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Page-specific styles for lab.html */
@@ -266,6 +271,52 @@
             margin: var(--space-xs) 0;
         }
 
+        /* Mobile overflow fix for addresses */
+        .address-list {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .address-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(0,255,65,0.05);
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            min-width: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .address-item .addr-index {
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        .address-item .addr-value {
+            color: #00ff41;
+            font-family: monospace;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            min-width: 0;
+            flex: 1;
+        }
+
+        @media (max-width: 600px) {
+            .address-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .address-item .addr-value {
+                font-size: 0.75rem;
+                word-break: break-all;
+            }
+        }
+
         .highlight-box {
             background: rgba(74, 222, 128, 0.05);
             border-left: 3px solid var(--accent-primary);
@@ -283,6 +334,45 @@
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Summary stats for step 4 */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .summary-stats .stat-box {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0,255,65,0.05);
+            border-radius: 4px;
+        }
+
+        .summary-stats .stat-box:nth-child(3) {
+            background: rgba(255,100,100,0.05);
+        }
+
+        .summary-stats .stat-value {
+            font-size: 1.5rem;
+            color: #00ff41;
+        }
+
+        .summary-stats .stat-box:nth-child(3) .stat-value {
+            color: #ff6666;
+        }
+
+        .summary-stats .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 <body>
@@ -440,18 +530,18 @@
                                     <strong>Key Insight:</strong> Alice can generate addresses and send payments, but <em>only Bob can spend them</em> because only he knows private key <code>b</code>. This is the magic of BIP47—one-way address derivation.
                                 </div>
 
-                                <div class="summary-stats" id="receiving-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">1</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Notification TX</div>
+                                <div class="summary-stats" id="receiving-summary">
+                                    <div class="stat-box">
+                                        <div class="stat-value">1</div>
+                                        <div class="stat-label">Notification TX</div>
                                     </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(0,255,65,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #00ff41;">∞</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Payment Addresses</div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">∞</div>
+                                        <div class="stat-label">Payment Addresses</div>
                                     </div>
-                                    <div class="stat-box" style="text-align: center; padding: 1rem; background: rgba(255,100,100,0.05); border-radius: 4px;">
-                                        <div class="stat-value" style="font-size: 1.5rem; color: #ff6666;">0</div>
-                                        <div class="stat-label" style="font-size: 0.75rem; color: #888;">Address Reuse</div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">0</div>
+                                        <div class="stat-label">Address Reuse</div>
                                     </div>
                                 </div>
 
@@ -468,7 +558,7 @@
                     </div>
                 </div>
 
-                <div class="tool-grid" style="margin-top: 1.5rem;">
+                <div class="tool-grid" style="margin-top: 1.5rem; margin-bottom: var(--space-xl);">
                     <!-- Validator Tool -->
                     <div class="tool-panel">
                         <div class="tool-header">
@@ -489,11 +579,13 @@
                     </div>
                 </div>
 
-                <div class="footer">
-                    <div class="footer-text">Payment codes are reusable and privacy-preserving</div>
-                </div>
             </div>
         </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
+        <div class="footer-text">Privacy is a human fight</div>
     </div>
 
     <script>
@@ -645,10 +737,11 @@
             addresses.forEach((a, i) => {
                 setTimeout(() => {
                     const div = document.createElement('div');
-                    div.style.cssText = 'padding: 0.5rem; background: rgba(0,255,65,0.05); margin: 0.25rem 0; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; animation: slideIn 0.3s ease;';
+                    div.className = 'address-item';
+                    div.style.animation = 'slideIn 0.3s ease';
                     div.innerHTML = `
-                        <span style="color: #888;">#${a.idx}</span>
-                        <span style="color: #00ff41; font-family: monospace;">${a.addr}</span>
+                        <span class="addr-index">#${a.idx}</span>
+                        <span class="addr-value">${a.addr}</span>
                     `;
                     list.appendChild(div);
                 }, i * 200);

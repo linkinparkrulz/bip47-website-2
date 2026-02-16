@@ -439,11 +439,93 @@ bip47-website/
 │   ├── lab.html        # BIP47 LAB tools
 │   ├── guestbook.html  # Guestbook with Auth47
 │   ├── auth.html       # Auth47 demo
-│   └── callback.html   # Wallet callback page
+│   ├── callback.html   # Wallet callback page
+│   └── logos/          # Project logos for SUPPORTED BY sections
+│       ├── samourai.png
+│       ├── sparrow.png
+│       ├── bluewallet.png
+│       ├── stack.png
+│       └── Ashigaru.png
 ├── server.js           # Express server (all backend logic)
 ├── package.json        # Dependencies
 └── AGENTS.md          # This file
 ```
+
+## UI Components
+
+### SUPPORTED BY Section
+
+The project features a "SUPPORTED BY" showcase section that displays logos of BIP47/Paynym-compatible wallets and services.
+
+**Main Page (index.html):**
+- Full-width section below the card grid
+- Displays 5 project logos: Samourai, Sparrow, BlueWallet, Stack, Ashigaru
+- Grayscale logos that turn colorful on hover
+- Links to external project websites
+
+**Auth Page (auth.html):**
+- Compact version inside the auth-card
+- Displays 3 Auth47-compatible wallets: Samourai, Ashigaru, Sparrow
+- Centered below the "Generate Auth QR Code" button
+- Same hover effects as main page
+
+**Styling (styles.css):**
+```css
+/* Main page supported-by */
+.supported-by {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.logo-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.logo-link {
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all var(--transition-normal);
+}
+
+.logo-link:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+```
+
+### Card Component Updates
+
+**Typography Hierarchy:**
+- Card titles: 1.25rem, font-weight 700 (bolder)
+- Card descriptions: 0.8rem, lighter color, line-height 1.6
+- Card icons: 1.75rem for better visual anchors
+- Uses flexbox with gap for consistent spacing
+
+**CTA Buttons:**
+- Background fill: rgba(74, 222, 128, 0.1)
+- Border and rounded corners
+- Hover state brightens background
+- Keeps bracketed `[ACTION]` style
+
+**Responsive Grid:**
+- 3 columns at 1000px+
+- 2 columns at 600px-999px
+- 1 column below 600px
 
 ## PR Instructions
 
