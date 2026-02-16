@@ -951,7 +951,7 @@
                 // Client-side checks
                 const clientChecks = {
                     prefix: paymentCode.startsWith('PM8T'),
-                    length: paymentCode.length === 111,
+                    length: paymentCode.length === 116,
                     base58: /^[1-9A-HJ-NP-Za-km-z]+$/.test(paymentCode)
                 };
 
@@ -1175,7 +1175,7 @@
 
             const checkLabels = {
                 prefix: 'Prefix "PM8T"',
-                length: 'Length (111 chars)',
+                length: 'Length (116 chars)',
                 base58: 'Base58 encoding',
                 structure: '80-byte structure',
                 checksum: 'Checksum valid',
