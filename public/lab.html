@@ -465,10 +465,15 @@
             border-radius: var(--radius-sm);
             font-size: 0.75rem;
             color: var(--text-muted);
+            line-height: 1.8;
         }
 
         .byte-legend strong { color: var(--text-secondary); }
-        .byte-legend span { display: inline-block; margin: 0 var(--space-sm); }
+        .byte-legend span { 
+            display: inline-block; 
+            margin: 0 var(--space-sm);
+            white-space: nowrap;
+        }
 
         .components-grid {
             display: grid;
@@ -540,13 +545,13 @@
             padding: var(--space-md);
             background: var(--bg-elevated);
             border-radius: var(--radius-md);
-            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--accent-primary);
             transition: all var(--transition-fast);
         }
 
         .derived-item:hover {
-            border-color: var(--border-default);
             background: var(--bg-surface);
+            border-left-width: 4px;
         }
 
         .derived-label {
@@ -1049,13 +1054,22 @@
                 const breakdownDiv = document.getElementById('byte-breakdown');
                 breakdownDiv.style.display = 'block';
                 breakdownDiv.querySelector('.section-title').textContent = '📊 Byte Structure Analysis - Invalid Structure';
+                
+                // Hide the legend when showing invalid structure
+                const legend = breakdownDiv.querySelector('.byte-legend');
+                if (legend) legend.style.display = 'none';
+                
                 document.getElementById('byte-grid').innerHTML = `
-                    <div style="padding: 1rem; color: var(--accent-error); text-align: center;">
-                        Expected 85 bytes, got ${decoded ? decoded.length : 'unknown'} bytes.<br>
-                        <small style="color: var(--text-muted);">This may indicate a malformed or incompatible payment code.</small>
+                    <div style="padding: 2rem 1rem; color: var(--accent-error); text-align: center; width: 100%;">
+                        <div style="font-size: 1rem; margin-bottom: 0.5rem;">
+                            Expected 85 bytes, got ${decoded ? decoded.length : 'unknown'} bytes.
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">
+                            This may indicate a malformed or incompatible payment code.
+                        </div>
                     </div>
                 `;
-                // Hide other component sections but keep legend visible
+                // Hide other component sections
                 document.getElementById('component-details').style.display = 'none';
                 document.getElementById('derived-info').style.display = 'none';
             }
@@ -1067,7 +1081,13 @@
         function displayByteBreakdown(bytes) {
             const grid = document.getElementById('byte-grid');
             grid.innerHTML = '';
-            document.getElementById('byte-breakdown').style.display = 'block';
+            const breakdownDiv = document.getElementById('byte-breakdown');
+            breakdownDiv.style.display = 'block';
+            
+            // Reset title and show legend
+            breakdownDiv.querySelector('.section-title').textContent = '📊 Byte Structure Analysis (85 bytes total)';
+            const legend = breakdownDiv.querySelector('.byte-legend');
+            if (legend) legend.style.display = 'block';
 
             // 85-byte BIP47 payment code structure:
             // Byte 0: Base58Check prefix (0x47) - 1 byte
