@@ -977,13 +977,13 @@
                         
                         // Parse components (85-byte structure)
                         components = {
-                            prefix: decoded[0],
-                            version: decoded[1],
-                            features: decoded[2],
-                            pubkey: Array.from(decoded.slice(3, 36)),
-                            chaincode: Array.from(decoded.slice(36, 68)),
-                            padding: Array.from(decoded.slice(68, 81)),
-                            checksum: Array.from(decoded.slice(81, 85))
+                            prefix: decoded[0],           // Byte 0: Base58Check prefix
+                            version: decoded[1],          // Byte 1: BIP47 version
+                            features: decoded[2],         // Byte 2: Feature flags
+                            pubkey: Array.from(decoded.slice(3, 36)),   // Bytes 3-35: Public key (33 bytes)
+                            chaincode: Array.from(decoded.slice(36, 68)), // Bytes 36-67: Chain code (32 bytes)
+                            padding: Array.from(decoded.slice(68, 81)),   // Bytes 68-80: Padding (13 bytes)
+                            checksum: Array.from(decoded.slice(81, 85))  // Bytes 81-84: Checksum (4 bytes)
                         };
                     } else {
                         clientChecks.structure = false;
@@ -1045,8 +1045,17 @@
                 displayComponents(components);
                 displayDerivedInfo(components);
             } else {
-                // Hide byte sections if no valid decode
-                document.getElementById('byte-breakdown').style.display = 'none';
+                // Show message about invalid structure
+                const breakdownDiv = document.getElementById('byte-breakdown');
+                breakdownDiv.style.display = 'block';
+                breakdownDiv.querySelector('.section-title').textContent = '📊 Byte Structure Analysis - Invalid Structure';
+                document.getElementById('byte-grid').innerHTML = `
+                    <div style="padding: 1rem; color: var(--accent-error); text-align: center;">
+                        Expected 85 bytes, got ${decoded ? decoded.length : 'unknown'} bytes.<br>
+                        <small style="color: var(--text-muted);">This may indicate a malformed or incompatible payment code.</small>
+                    </div>
+                `;
+                // Hide other component sections but keep legend visible
                 document.getElementById('component-details').style.display = 'none';
                 document.getElementById('derived-info').style.display = 'none';
             }
@@ -1161,7 +1170,9 @@
             grid.innerHTML = '';
             document.getElementById('derived-info').style.display = 'block';
 
-            const fullPubKey = [components.sign, ...components.pubkey]
+            // Get the sign byte from the first byte of pubkey array (it's byte 3 of the raw payment code)
+            const signByte = components.pubkey[0];
+            const fullPubKey = components.pubkey
                 .map(b => b.toString(16).padStart(2, '0')).join('');
 
             const derivedInfo = [
@@ -1171,7 +1182,7 @@
                 },
                 {
                     label: 'Address Format',
-                    value: components.sign === 0x02 || components.sign === 0x03 ? 'P2PKH or P2WPKH' : 'Unknown'
+                    value: signByte === 0x02 || signByte === 0x03 ? 'P2PKH or P2WPKH' : 'Unknown'
                 },
                 {
                     label: 'Full Public Key',
