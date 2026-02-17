@@ -447,6 +447,7 @@
         .byte-cell.sign { border-color: #6bcf7f; background: rgba(107, 207, 127, 0.05); }
         .byte-cell.pubkey { border-color: #4ecdc4; background: rgba(78, 205, 196, 0.05); }
         .byte-cell.chaincode { border-color: #c77dff; background: rgba(199, 125, 255, 0.05); }
+        .byte-cell.padding { border-color: #888888; background: rgba(136, 136, 136, 0.05); }
         .byte-cell.checksum { border-color: #ff9b85; background: rgba(255, 155, 133, 0.05); }
 
         .byte-label {
@@ -806,15 +807,16 @@
 
                         <!-- Byte Breakdown -->
                         <div id="byte-breakdown" class="byte-breakdown-section">
-                            <div class="section-title">📊 Byte Structure Analysis (80 bytes total)</div>
+                            <div class="section-title">📊 Byte Structure Analysis (85 bytes total)</div>
                             <div id="byte-grid" class="byte-grid"></div>
                             <div class="byte-legend">
                                 <strong>Legend:</strong> 
-                                <span style="color: #ff6b9d;">■</span> Version (1 byte) 
-                                <span style="color: #ffd93d;">■</span> Features (1 byte) 
-                                <span style="color: #6bcf7f;">■</span> Sign (1 byte) 
+                                <span style="color: #ff6b9d;">■</span> Prefix (1 byte) 
+                                <span style="color: #ffd93d;">■</span> Version (1 byte) 
+                                <span style="color: #6bcf7f;">■</span> Features (1 byte) 
                                 <span style="color: #4ecdc4;">■</span> Public Key (33 bytes) 
                                 <span style="color: #c77dff;">■</span> Chain Code (32 bytes) 
+                                <span style="color: #888888;">■</span> Padding (13 bytes) 
                                 <span style="color: #ff9b85;">■</span> Checksum (4 bytes)
                             </div>
                         </div>
@@ -962,17 +964,26 @@
                 try {
                     decoded = base58Decode(paymentCode);
                     
-                    if (decoded.length === 80) {
+                    // BIP47 payment code is 85 bytes:
+                    // Byte 0: Base58Check prefix (0x47)
+                    // Byte 1: BIP47 version (0x01)
+                    // Byte 2: Features (0x00)
+                    // Bytes 3-35: Public key (33 bytes)
+                    // Bytes 36-67: Chain code (32 bytes)
+                    // Bytes 68-80: Padding (13 bytes, zeros)
+                    // Bytes 81-84: Checksum (4 bytes)
+                    if (decoded.length === 85) {
                         clientChecks.structure = true;
                         
-                        // Parse components
+                        // Parse components (85-byte structure)
                         components = {
-                            version: decoded[0],
-                            features: decoded[1],
-                            sign: decoded[2],
+                            prefix: decoded[0],
+                            version: decoded[1],
+                            features: decoded[2],
                             pubkey: Array.from(decoded.slice(3, 36)),
                             chaincode: Array.from(decoded.slice(36, 68)),
-                            checksum: Array.from(decoded.slice(-4))
+                            padding: Array.from(decoded.slice(68, 81)),
+                            checksum: Array.from(decoded.slice(81, 85))
                         };
                     } else {
                         clientChecks.structure = false;
@@ -1028,8 +1039,8 @@
                 statusDiv.innerHTML = '❌ INVALID Payment Code';
             }
 
-            // Byte breakdown
-            if (decoded && decoded.length === 80) {
+            // Byte breakdown (85-byte BIP47 payment code structure)
+            if (decoded && decoded.length === 85) {
                 displayByteBreakdown(decoded);
                 displayComponents(components);
                 displayDerivedInfo(components);
@@ -1049,24 +1060,33 @@
             grid.innerHTML = '';
             document.getElementById('byte-breakdown').style.display = 'block';
 
+            // 85-byte BIP47 payment code structure:
+            // Byte 0: Base58Check prefix (0x47) - 1 byte
+            // Byte 1: BIP47 version (0x01) - 1 byte
+            // Byte 2: Features (0x00) - 1 byte
+            // Bytes 3-35: Public key (33 bytes)
+            // Bytes 36-67: Chain code (32 bytes)
+            // Bytes 68-80: Padding (13 bytes, zeros)
+            // Bytes 81-84: Checksum (4 bytes)
             const sections = [
-                { start: 0, end: 1, class: 'version', label: 'VER' },
-                { start: 1, end: 2, class: 'features', label: 'FEAT' },
-                { start: 2, end: 3, class: 'sign', label: 'SIGN' },
+                { start: 0, end: 1, class: 'version', label: 'PREFIX' },
+                { start: 1, end: 2, class: 'features', label: 'VER' },
+                { start: 2, end: 3, class: 'sign', label: 'FEAT' },
                 { start: 3, end: 36, class: 'pubkey', label: 'PUB' },
                 { start: 36, end: 68, class: 'chaincode', label: 'CHAIN' },
-                { start: 68, end: 72, class: 'checksum', label: 'CHK' },
+                { start: 68, end: 81, class: 'padding', label: 'PAD' },
+                { start: 81, end: 85, class: 'checksum', label: 'CHK' },
             ];
 
             for (let i = 0; i < bytes.length; i++) {
                 const section = sections.find(s => i >= s.start && i < s.end);
                 const cell = document.createElement('div');
-                cell.className = `byte-cell ${section.class}`;
+                cell.className = `byte-cell ${section ? section.class : ''}`;
                 cell.innerHTML = `
                     ${bytes[i].toString(16).padStart(2, '0').toUpperCase()}
-                    <div class="byte-label">${section.label}</div>
+                    <div class="byte-label">${section ? section.label : '?'}</div>
                 `;
-                cell.title = `Byte ${i}: 0x${bytes[i].toString(16).padStart(2, '0')} (${section.label})`;
+                cell.title = `Byte ${i}: 0x${bytes[i].toString(16).padStart(2, '0')} (${section ? section.label : 'unknown'})`;
                 grid.appendChild(cell);
             }
         }
@@ -1078,34 +1098,40 @@
 
             const componentInfo = [
                 {
+                    name: 'Prefix Byte',
+                    value: `0x${components.prefix.toString(16).padStart(2, '0')}`,
+                    size: '1 byte',
+                    description: 'Base58Check prefix. 0x47 (71 decimal) indicates BIP47 payment code version 1.'
+                },
+                {
                     name: 'Version Byte',
                     value: `0x${components.version.toString(16).padStart(2, '0')}`,
                     size: '1 byte',
-                    description: 'BIP47 version identifier. 0x47 (71 decimal) indicates version 1.'
+                    description: 'BIP47 version. 0x01 for version 1, 0x02 for version 2, etc.'
                 },
                 {
                     name: 'Features Byte',
                     value: `0x${components.features.toString(16).padStart(2, '0')}`,
                     size: '1 byte',
-                    description: 'Feature flags. Bit 0: Bitmessage notification. Currently unused.'
+                    description: 'Feature flags. Bit 0: Bitmessage notification. Currently 0x00 (unused).'
                 },
                 {
-                    name: 'Sign Byte',
-                    value: `0x${components.sign.toString(16).padStart(2, '0')}`,
-                    size: '1 byte',
-                    description: 'Public key prefix. 0x02 or 0x03 for compressed keys.'
-                },
-                {
-                    name: 'Public Key (x-coordinate)',
+                    name: 'Public Key',
                     value: components.pubkey.map(b => b.toString(16).padStart(2, '0')).join(''),
                     size: '33 bytes',
-                    description: 'Compressed secp256k1 public key for ECDH shared secret generation.'
+                    description: 'Compressed secp256k1 public key (0x02 or 0x03 prefix + 32-byte x-coordinate) for ECDH shared secret generation.'
                 },
                 {
                     name: 'Chain Code',
                     value: components.chaincode.map(b => b.toString(16).padStart(2, '0')).join(''),
                     size: '32 bytes',
                     description: 'BIP32 chain code for hierarchical key derivation.'
+                },
+                {
+                    name: 'Padding',
+                    value: components.padding.map(b => b.toString(16).padStart(2, '0')).join(''),
+                    size: '13 bytes',
+                    description: 'Reserved padding bytes, must be all zeros (0x00). Reserved for future protocol extensions.'
                 },
                 {
                     name: 'Checksum',
@@ -1153,7 +1179,7 @@
                 },
                 {
                     label: 'Total Size',
-                    value: '80 bytes (raw) → 111 chars (Base58)'
+                    value: '85 bytes (raw) → 116 chars (Base58)'
                 }
             ];
 
@@ -1177,7 +1203,7 @@
                 prefix: 'Prefix "PM8T"',
                 length: 'Length (116 chars)',
                 base58: 'Base58 encoding',
-                structure: '80-byte structure',
+                structure: '85-byte structure',
                 checksum: 'Checksum valid',
                 format: 'Valid format',
                 version: 'Version byte'
