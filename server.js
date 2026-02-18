@@ -552,6 +552,11 @@ app.get('/docs', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'docs.html'));
 });
 
+// About page route
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+
 // QR Code generation endpoint for payment codes
 app.get('/api/qr', async (req, res) => {
   try {
