@@ -466,12 +466,16 @@
             font-size: 0.75rem;
             color: var(--text-muted);
             line-height: 1.8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xs) var(--space-md);
+            align-items: center;
         }
 
         .byte-legend strong { color: var(--text-secondary); }
         .byte-legend span { 
-            display: inline-block; 
-            margin: 0 var(--space-sm);
+            display: inline-flex; 
+            align-items: center;
             white-space: nowrap;
         }
 
@@ -1060,7 +1064,7 @@
                 if (legend) legend.style.display = 'none';
                 
                 document.getElementById('byte-grid').innerHTML = `
-                    <div style="padding: 2rem 1rem; color: var(--accent-error); text-align: center; width: 100%;">
+                    <div style="grid-column: 1 / -1; padding: 2rem 1rem; color: var(--accent-error); text-align: center;">
                         <div style="font-size: 1rem; margin-bottom: 0.5rem;">
                             Expected 85 bytes, got ${decoded ? decoded.length : 'unknown'} bytes.
                         </div>
