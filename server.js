@@ -503,7 +503,7 @@ app.post('/api/bip47/validate', (req, res) => {
 
     const checks = {
       format: paymentCode.startsWith('PM8T'),
-      length: paymentCode.length === 111,
+      length: paymentCode.length === 116,
       base58: /^[1-9A-HJ-NP-Za-km-z]+$/.test(paymentCode),
       checksum: false,
       version: false
@@ -550,6 +550,11 @@ app.get('/guestbook', (req, res) => {
 // Documentation page route
 app.get('/docs', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'docs.html'));
+});
+
+// About page route
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
 
 // QR Code generation endpoint for payment codes

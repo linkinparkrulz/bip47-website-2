@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - BIP47 & PayNyms</title>
+    <link rel="icon" type="image/x-icon" href="/logos/favicons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/logos/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/logos/favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/logos/favicons/apple-touch-icon.png">
+    <link rel="manifest" href="/logos/favicons/site.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* About page specific styles */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+ 
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color var(--transition-fast);
+        }
+ 
+        .back-link:hover { color: var(--accent-primary); }
+ 
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: var(--space-xl);
+        }
+ 
+        .about-section {
+            margin-bottom: var(--space-2xl);
+        }
+ 
+        .about-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent-primary);
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+ 
+        .about-section p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: var(--space-md);
+        }
+ 
+        .about-section ul {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+            padding-left: var(--space-lg);
+        }
+ 
+        .about-section li {
+            margin-bottom: var(--space-sm);
+            line-height: 1.7;
+        }
+ 
+        .hero-box {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-2xl);
+            text-align: center;
+        }
+ 
+        .hero-box h3 {
+            font-size: 1.1rem;
+            color: var(--accent-primary);
+            margin-bottom: var(--space-md);
+        }
+ 
+        .hero-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+ 
+        .stack-diagram {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            font-family: var(--font-data);
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+ 
+        .stack-diagram pre {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+ 
+        .stack-diagram .highlight { color: var(--accent-primary); }
+        .stack-diagram .label { color: var(--text-muted); }
+ 
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+ 
+        .feature-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            transition: all var(--transition-fast);
+        }
+ 
+        .feature-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+ 
+        .feature-card h4 {
+            font-size: 1rem;
+            color: var(--accent-primary);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+ 
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+ 
+        .info-box {
+            background: rgba(74, 222, 128, 0.05);
+            border-left: 3px solid var(--accent-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+        }
+ 
+        .info-box p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+ 
+        .cahoots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+ 
+        .cahoots-item {
+            background: var(--bg-elevated);
+            border-left: 3px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+        }
+ 
+        .cahoots-item h4 { font-size: 1rem; color: var(--accent-primary); margin-bottom: var(--space-sm); }
+        .cahoots-item p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+ 
+        .steps-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+            margin: var(--space-lg) 0;
+        }
+ 
+        .steps-list li {
+            counter-increment: step-counter;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--accent-primary);
+        }
+ 
+        .steps-list li::before {
+            content: counter(step-counter);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--accent-primary);
+            font-weight: 600;
+            border-radius: 50%;
+            font-size: 0.9rem;
+        }
+ 
+        .steps-list li span { color: var(--text-secondary); line-height: 1.6; padding-top: 4px; }
+ 
+        .wallet-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+        }
+ 
+        .wallet-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all var(--transition-fast);
+        }
+ 
+        .wallet-link:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+ 
+        @media (max-width: 600px) {
+            .stack-diagram { padding: var(--space-md); font-size: 0.75rem; }
+            .feature-grid, .cahoots-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <a href="/" class="back-link">← Back to Home</a>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">[ABOUT]</span>
+        </div>
+ 
+        <div class="main-content">
+            <h1>> ABOUT</h1>
+            <div class="subtitle">Understanding the BIP47 Privacy Ecosystem</div>
+ 
+            <!-- Intro Section -->
+            <section class="about-section">
+                <h2>> Introduction</h2>
+                <p>
+                    BIP47 is a Bitcoin protocol enhancement that introduces <strong>payment codes</strong>, 
+                    allowing users to share a single identifier that automatically generates fresh addresses for each payment. 
+                    Combined with PayNyms and Soroban, it creates a layered privacy ecosystem that's robust and easy to use.
+                </p>
+                <p>
+                    At its core, BIP47 helps preserve privacy by decoupling your public identity (PayNym) from the addresses you actually receive funds to. 
+                    This prevents casual observers or data aggregators from linking payments to your personal financial activity.
+                </p>
+            </section>
+ 
+            <!-- Hero Section -->
+            <div class="hero-box">
+                <h3>More Than Address Reuse</h3>
+                <p>
+                    While BIP47 is often described as a solution to address reuse, it is fundamentally about reclaiming financial privacy. 
+                    One payment code unlocks a suite of tools that collectively protect you from surveillance, profiling, and other risks inherent in public blockchains.
+                </p>
+            </div>
+ 
+            <!-- Address Reuse Prevention -->
+            <section class="about-section">
+                <h2>> Address Reuse Prevention</h2>
+                <p>
+                    When you receive Bitcoin to the same address multiple times, anyone observing the blockchain can link all those payments together. This means a stranger could track exactly how much you receive, when, and from whom—compromising your privacy as a recipient.
+                </p>
+                <p>
+                    BIP47 protects receiver privacy automatically. Every incoming payment to your PayNym is assigned a fresh, unique address, making it impossible for observers to connect transactions or create a profile of your incoming funds.
+                </p>
+                <p>
+                    In short, BIP47 lets you share one PayNym while keeping your incoming payments private. Each transaction is isolated, unlinkable, and your financial activity remains confidential.
+                </p>
+            </section>
+ 
+ 
+            <!-- The Privacy Stack -->
+            <section class="about-section">
+                <h2>> The Privacy Stack</h2>
+                <p>
+                    BIP47 provides the base layer: reusable payment codes. Each subsequent layer adds features that strengthen privacy and usability.
+                </p>
+ 
+                <div class="stack-diagram">
+                    <pre>
+    <span class="highlight">BIP47 Payment Codes</span>
+    <span class="label">└── Reusable payment identifiers, address rotation</span>
+           │
+           ▼
+    <span class="highlight">PayNyms</span>                                   <span class="highlight">Soroban</span>
+    <span class="label">└── Human-readable identity (+username)</span>   <span class="label">└── Encrypted peer-to-peer communication</span>
+    <span class="label">    Social discovery & connection</span>         <span class="label">    No servers, no intermediaries</span>
+           │                                         │
+           │                                         │
+           └─────────────────────────┬───────────────┘
+                                     │
+                                     ▼
+                              <span class="highlight">Cahoots</span>
+                              <span class="label">├── Stowaway (Payjoin)</span>
+                              <span class="label">└── StonewallX2 (Collaborative TX)</span>
+                    </pre>
+                </div>
+ 
+                <div class="info-box">
+                    <p>
+                        <strong>Key insight:</strong> Each layer enhances the previous. Without BIP47, PayNyms cannot function. Without PayNyms, remote collaboration is difficult. Without Soroban, encrypted coordination is impossible. Together, they make privacy practical and scalable.
+                    </p>
+                </div>
+            </section>
+ 
+            <!-- Why Privacy Matters -->
+            <section class="about-section">
+                <h2>> Why Privacy Matters</h2>
+                <p>
+                    Bitcoin is "pseudonymous," meaning addresses are public but not directly tied to your real-world identity. 
+                    This pseudonymity can be fragile. Public addresses can be aggregated by blockchain analytics companies to infer patterns, ownership, and even personal identity.
+                </p>
+                <p>
+                    Common heuristics, like the <strong>Common Input Ownership Heuristic (CIOH)</strong>, assume that multiple inputs in a single transaction belong to the same user. 
+                    These assumptions are often accurate and widely used in chain analysis, making transactions potentially traceable.
+                </p>
+                <p>
+                    BIP47, combined with collaborative transactions (Cahoots), disrupts these heuristics. By breaking patterns and adding uncertainty, it makes it significantly harder for anyone to track your activity or control your financial information.
+                </p>
+                <p>
+                    In real-world terms, this means protection against:
+                </p>
+                <ul>
+                    <li>Surveillance by corporations, governments, or bad actors.</li>
+                    <li>Profiling or de-anonymization through repeated address reuse.</li>
+                    <li>Targeted attacks, phishing, or identity-linked financial exposure.</li>
+                </ul>
+            </section>
+ 
+            <!-- Collaborative Transactions & Remote Privacy -->
+            <section class="about-section">
+                <h2>> Collaborative Transactions & Remote Privacy</h2>
+                <p>
+                    Collaborative transactions, often called <strong>Cahoots</strong>, let multiple participants work together to create a single transaction that is harder to analyze. 
+                    By adding "noise" and breaking the usual assumptions used by blockchain analysis, these transactions protect your financial privacy in ways that solo payments cannot.
+                </p>
+            
+                <div class="cahoots-grid">
+                    <div class="cahoots-item">
+                        <h4>Stowaway (Payjoin)</h4>
+                        <p>
+                            Stowaway is a type of Payjoin where both sender and receiver contribute inputs to the transaction. 
+                            Observers see a normal-looking transaction, but they cannot reliably determine which inputs belong to whom. 
+                            This breaks the <strong>Common Input Ownership Heuristic</strong> and hides the true flow of funds.
+                        </p>
+                    </div>
+            
+                    <div class="cahoots-item">
+                        <h4>StonewallX2</h4>
+                        <p>
+                            StonewallX2 is a collaborative transaction where a second participant contributes bitcoin to create a mini-coinjoin effect. 
+                            The transaction looks complex on-chain, confusing analysis tools and making it extremely difficult to trace the real payment. 
+                            Your collaborator remains net-neutral, and your payment stays private.
+                        </p>
+                    </div>
+                </div>
+            
+                <div class="info-box">
+                    <p>
+                        <strong>Why this matters:</strong> Both Stowaway and StonewallX2 are enabled by <strong>PayNyms</strong> and coordinated through <strong>Soroban</strong>. 
+                        This means you can execute these privacy-enhancing transactions remotely, without meeting anyone in person or relying on a trusted third party. 
+                        BIP47 payment codes make this seamless: a single PayNym is all you need, while each transaction still uses unique addresses to prevent linkage.
+                    </p>
+                </div>
+            
+                <p>
+                    In other words, BIP47 + PayNyms give you the foundation to safely engage in collaborative transactions. 
+                    Each payment remains unlinkable, your identity is protected, and the user experience is simple—even when coordinating complex privacy tools remotely.
+                </p>
+            </section>
+ 
+ 
+ 
+            <!-- What This Means For You -->
+            <section class="about-section">
+                <h2>> What This Means For You</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔗 One Simple ID</h4>
+                        <p>Share your PayNym ID like <strong>+username</strong> instead of long addresses. Easy to remember and share.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>♾️ Unlimited Addresses</h4>
+                        <p>Each payment automatically generates a unique address. No address reuse, no privacy leaks.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🤝 Remote Collaboration</h4>
+                        <p>Work with others on transactions without meeting in person. Soroban handles encrypted communication automatically.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🛡️ Analysis Disruption</h4>
+                        <p>Collaborative transactions like Payjoin and Stonewall X2 break blockchain heuristics, making your transactions harder to trace.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💼 Enhanced Security</h4>
+                        <p>Prevent external observers from linking your transactions or estimating your holdings, protecting your personal financial security.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⚡ Seamless Privacy</h4>
+                        <p>All of these protections happen automatically once you share your PayNym. BIP47 ensures privacy without extra effort.</p>
+                    </div>
+                </div>
+            </section>
+ 
+ 
+            <!-- Getting Started -->
+            <section class="about-section">
+                <h2>> Getting Started</h2>
+                <p>Steps to participate in the BIP47 privacy ecosystem:</p>
+                <ol class="steps-list">
+                    <li><span><strong>Get a compatible wallet.</strong> Wallets supporting BIP47 and PayNyms. See recommendations below.</span></li>
+                    <li><span><strong>Create your payment code.</strong> Generate your BIP47 code and PayNym ID (e.g., +username).</span></li>
+                    <li><span><strong>Share your PayNym ID.</strong> Receive payments without exposing real addresses.</span></li>
+                    <li><span><strong>Connect with others.</strong> Build a network of trusted PayNyms to enable collaborative transactions.</span></li>
+                    <li><span><strong>Try a Cahoots transaction.</strong> Participate in Stowaway or StonewallX2 to enhance your privacy.</span></li>
+                </ol>
+
+                <div class="supported-by">
+                    <div class="supported-by-heading">COMPATIBLE WALLETS</div>
+                    <div class="logo-grid">
+                        <a href="https://freesamourai.com" target="_blank" rel="noopener noreferrer" class="logo-link" title="Samourai Wallet">
+                            <img src="logos/samourai.png" alt="Samourai Wallet" class="logo-img">
+                        </a>
+                        <a href="https://sparrowwallet.com" target="_blank" rel="noopener noreferrer" class="logo-link" title="Sparrow Wallet">
+                            <img src="logos/sparrow.png" alt="Sparrow Wallet" class="logo-img">
+                        </a>
+                        <a href="https://ashigaru.rs" target="_blank" rel="noopener noreferrer" class="logo-link" title="Ashigaru">
+                            <img src="logos/Ashigaru.png" alt="Ashigaru" class="logo-img">
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-text">Built with <span class="footer-heart">♥</span> for the cypherpunk community</div>
+        <div class="footer-text">Privacy is a human fight</div>
+    </div>
+</body>
+</html>
