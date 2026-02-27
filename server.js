@@ -54,8 +54,8 @@ const bip47 = BIP47Factory(ecc);
 // Dynamic callback URL for production deployment
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/callback`;
 
-// Initialize Auth47 Verifier
-const verifier = new Auth47Verifier(CALLBACK_URL, ecc);
+// Initialize Auth47 Verifier (constructor expects ecc first, then callback URL)
+const verifier = new Auth47Verifier(ecc, CALLBACK_URL);
 
 
 // Store pending authentications (use Redis/DB in production)
