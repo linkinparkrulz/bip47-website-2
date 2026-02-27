@@ -54,7 +54,7 @@ const bip47 = BIP47Factory(ecc);
 // Dynamic callback URL for production deployment
 const CALLBACK_URL = process.env.CALLBACK_URL || `http://localhost:${PORT}/callback`;
 
-// Initialize Auth47 Verifier
+// Initialize Auth47 Verifier (constructor expects ecc first, then callback URL)
 const verifier = new Auth47Verifier(ecc, CALLBACK_URL);
 
 
@@ -69,9 +69,11 @@ app.get('/start-auth', async (req, res) => {
     // Calculate expiry (5 minutes from now)
     const expiry = Math.floor(Date.now() / 1000) + 300; // 5 minutes
     
-    // Proper Auth47 URI format: auth47://<nonce>?c=<callback_url>&e=<expiry>
+    // Auth47 URI format with both c= and r= for maximum wallet compatibility
+    // - c= (callback): Used by Samourai/Ashigaru wallets
+    // - r= (resource): Auth47 spec-compliant (BlueWallet, Sparrow)
     // NOTE: Do NOT url-encode the callback URL - wallets expect it unencoded
-    const uri = `auth47://${nonce}?c=${CALLBACK_URL}&e=${expiry}`;
+    const uri = `auth47://${nonce}?c=${CALLBACK_URL}&e=${expiry}&r=${CALLBACK_URL}`;
     const qr = await QRCode.toDataURL(uri);
     
     // Store nonce with expiry
