@@ -516,7 +516,7 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                     <div class="code-header">
                         <span class="lang">URI Format</span>
                     </div>
-                    <pre><code>auth47://<nonce>?c=<callback_url>&e=<expiry_timestamp>&r=<callback_url></code></pre>
+                    <pre><code>auth47://<nonce>?c=<callback_url>[&r=<resource_url>][&e=<expiry_timestamp>]</code></pre>
                 </div>
 
                 <h4>Parameters</h4>
@@ -534,25 +534,25 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                         </tr>
                         <tr>
                             <td><code>c</code></td>
-                            <td>Callback URL (used by Samourai/Ashigaru wallets)</td>
+                            <td>Callback URL where the authentication response is POSTed</td>
+                        </tr>
+                        <tr>
+                            <td><code>r</code></td>
+                            <td>Resource URL (optional) - if omitted, callback URL is used as resource</td>
                         </tr>
                         <tr>
                             <td><code>e</code></td>
                             <td>Unix timestamp when challenge expires</td>
-                        </tr>
-                        <tr>
-                            <td><code>r</code></td>
-                            <td>Resource URL - Auth47 spec-compliant parameter (BlueWallet, Sparrow)</td>
                         </tr>
                     </tbody>
                 </table>
 
                 <div class="info-box">
                     <p>
-                        <strong>Wallet Compatibility:</strong> Including both <code>c=</code> and <code>r=</code> parameters 
-                        ensures maximum wallet compatibility. Samourai and Ashigaru wallets use <code>c=</code> (callback), 
-                        while spec-compliant wallets like BlueWallet and Sparrow expect <code>r=</code> (resource). 
-                        Both parameters should contain the same callback URL.
+                        <strong>Challenge String Format:</strong> The challenge that gets signed always uses the <code>r=</code> 
+                        parameter format, even when the QR code only contains <code>c=</code>. If no explicit <code>r=</code> 
+                        parameter is present, the callback URL is used as the resource value. This ensures compatibility 
+                        with all wallet implementations (Samourai, Ashigaru, Sparrow, BlueWallet).
                     </p>
                 </div>
 
@@ -566,12 +566,18 @@ k = b + s  // Bob's private key + shared secret scalar</code></pre>
                         <span class="lang">JSON</span>
                     </div>
                     <pre><code>{
-  "auth47_response": "auth47://<nonce>?c=<callback>&e=<expiry>",
-  "challenge": "auth47://<nonce>?c=<callback>&e=<expiry>",
+  "auth47_response": "1.0",
+  "challenge": "auth47://<nonce>?r=<callback_or_resource>&e=<expiry>",
   "nym": "PM8T...",
   "signature": "<base64_signature>"
 }</code></pre>
                 </div>
+
+                <p>
+                    <strong>Note:</strong> The <code>challenge</code> field always contains the <code>r=</code> format, 
+                    where the value is either the explicit resource URL from the QR code, or the callback URL if no 
+                    resource was specified. The <code>c=</code> parameter is never included in the signed challenge.
+                </p>
 
                 <h3>Signature Verification</h3>
                 <p>
